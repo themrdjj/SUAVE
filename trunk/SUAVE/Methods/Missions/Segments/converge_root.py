@@ -51,7 +51,8 @@ def converge_root(segment):
                                          unknowns,
                                          args = segment,
                                          xtol = segment.state.numerics.tolerance_solution,
-                                         full_output=1)
+                                         fprime = FD_jacobian,
+                                         full_output = 1)
 
     if ier!=1:
         print("Segment did not converge. Segment Tag: " + segment.tag)
@@ -98,3 +99,49 @@ def iterate(unknowns, segment):
     residuals = segment.state.residuals.pack_array()
         
     return residuals 
+
+
+## @ingroup Methods-Missions-Segments
+def FD_jacobian(unknowns, segment):
+    
+    """Takes the jacobian of iterate using finite differencing
+
+    Assumptions:
+    N/A
+
+    Source:
+    N/A
+
+    Inputs:
+    state.unknowns                [Data]
+    segment.process.iterate       [Data]
+
+    Outputs:
+    jacobian                      [Unitless]
+
+    Properties Used:
+    N/A
+    """
+    
+    length = len(unknowns)
+    
+    jacobian = np.zeros((length,length))
+    H = 1e-8
+    
+    base_line = iterate(unknowns, segment)
+    
+    for ii in range(length):
+        unk = unknowns*1.0
+        
+        unk[ii] = unk[ii]+H
+        if isinstance(unk,array_type):
+            segment.state.unknowns.unpack_array(unk)
+        else:
+            segment.state.unknowns = unk
+            
+        segment.process.iterate(segment)
+    
+        residuals = segment.state.residuals.pack_array()
+        jacobian[:,ii] = (residuals-base_line)/H
+        
+    return jacobian
