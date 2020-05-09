@@ -47,13 +47,20 @@ def converge_root(segment):
     except AttributeError:
         root_finder = scipy.optimize.fsolve 
     
-    unknowns,infodict,ier,msg = root_finder( iterate,
-                                         unknowns,
-                                         args = segment,
-                                         xtol = segment.state.numerics.tolerance_solution,
-                                         fprime = FD_jacobian,
-                                         full_output = 1)
-
+    if segment.use_Jacobian: 
+        unknowns,infodict,ier,msg = root_finder( iterate,
+                                             unknowns,
+                                             args = segment,
+                                             xtol = segment.state.numerics.tolerance_solution,
+                                             fprime = FD_jacobian,
+                                             full_output = 1)
+    else:
+        unknowns,infodict,ier,msg = root_finder( iterate,
+                                               unknowns,
+                                               args = segment,
+                                               xtol = segment.state.numerics.tolerance_solution,
+                                               full_output=1)        
+        
     if ier!=1:
         print("Segment did not converge. Segment Tag: " + segment.tag)
         print("Error Message:\n" + msg)
@@ -61,7 +68,10 @@ def converge_root(segment):
     else:
         segment.state.numerics.converged = True
          
-                            
+    # store convergence results 
+    segment.state.numerics.info_dict  = infodict
+    segment.state.numerics.message    = msg
+    
     return
     
 # ----------------------------------------------------------------------
@@ -143,5 +153,7 @@ def FD_jacobian(unknowns, segment):
     
         residuals = segment.state.residuals.pack_array()
         jacobian[:,ii] = (residuals-base_line)/H
-        
+    
+    segment.state.numerics.jacobian_evaluations += 1
+    
     return jacobian

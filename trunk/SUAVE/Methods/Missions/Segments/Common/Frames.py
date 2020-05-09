@@ -100,6 +100,8 @@ def initialize_time(segment):
     elif 'start_time' in segment:
         segment.state.conditions.frames.planet.start_time = segment.start_time
     
+    # increment the number of iterations in a segment
+    segment.state.numerics.iterations += 1
     return
     
 

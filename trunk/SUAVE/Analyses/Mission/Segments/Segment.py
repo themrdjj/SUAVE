@@ -55,7 +55,7 @@ class Segment(Analysis):
 
         self.analyses = Analysis.Container()
         
-        self.process = Process()
+        self.process                       = Process()
         self.process.initialize            = Process()
         self.process.converge              = Process()
         self.process.iterate               = Process()
@@ -66,7 +66,9 @@ class Segment(Analysis):
         self.process.finalize              = Process()
         self.process.finalize.post_process = Process()
         
-        self.conditions = self.state.conditions
+        self.use_Jacobian                  = True 
+        
+        self.conditions                    = self.state.conditions
         
         return
         

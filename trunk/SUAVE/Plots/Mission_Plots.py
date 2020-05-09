@@ -1378,3 +1378,64 @@ def set_axes(axes):
     axes.grid(True)   
 
     return  
+
+
+# ------------------------------------------------------------------
+#   Numerics 
+# ------------------------------------------------------------------
+## @ingroup Plots
+def plot_converge_numerics(results, line_color = 'bo-', save_figure = False, save_filename = "Converge_Numerics", file_type = ".png"):
+    """This plots the static stability characteristics of an aircraft
+
+    Assumptions:
+    None
+
+    Source:
+    None
+
+    Inputs:
+    results.segments.conditions.
+    
+    Outputs: 
+    Plots
+
+    Properties Used:
+    N/A	
+    """	    
+    axis_font = {'size':'14'} 
+    fig = plt.figure(save_filename)
+    fig.set_size_inches(8, 14)
+    
+    num_segs = 0 
+    res_nfev = []
+    jac_eval = []
+    iters    = []
+    for segment in results.segments.values():
+        res_nfev.append(segment.state.numerics.info_dict['nfev'])
+        jac_eval.append(segment.state.numerics.jacobian_evaluations) 
+        iters.append(segment.state.numerics.iterations)    
+        num_segs += 1
+     
+    segs = np.linspace(0,num_segs-1,num_segs)  
+    
+    
+    axes = fig.add_subplot(3,1,1)
+    axes.plot( segs , np.array(res_nfev) , line_color )
+    axes.set_ylabel(r'# of Funct. Evals',axis_font)
+    set_axes(axes)    
+    
+    axes = fig.add_subplot(3,1,2)
+    axes.plot( segs , np.array(jac_eval) , line_color )
+    axes.set_ylabel(r'# of Jacob. Evals',axis_font)
+    set_axes(axes)    
+    
+    axes = fig.add_subplot(3,1,3)
+    axes.plot( segs , np.array(iters) , line_color )
+    axes.set_ylabel(r'# of Iter.',axis_font)
+    set_axes(axes)    
+            
+    if save_figure:
+        plt.savefig(save_filename + file_type)
+        
+    return
+
