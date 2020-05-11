@@ -50,6 +50,8 @@ class Numerics(Conditions):
         self.tag = 'numerics'
         
         self.number_control_points = 16
+        self.iterations            = 0 
+        self.jacobian_evaluations  = 0  
         self.discretization_method = chebyshev_data
         
         self.solver_jacobian                  = "none"

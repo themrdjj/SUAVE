@@ -1349,36 +1349,6 @@ def create_video_frames(results,vehicle, save_figure = True ,flight_profile = Tr
             img_idx += 1	
         seg_idx +=1 
 
-# ------------------------------------------------------------------
-#   Set Axis Parameters 
-# ------------------------------------------------------------------
-## @ingroup Plots
-def set_axes(axes):
-    """This sets the axis parameters for all plots
-
-    Assumptions:
-    None
-
-    Source:
-    None
-
-    Inputs
-    axes
-        
-    Outputs: 
-    axes
-
-    Properties Used:
-    N/A	
-    """   
-    
-    axes.minorticks_on()
-    axes.grid(which='major', linestyle='-', linewidth='0.5', color='grey')
-    axes.grid(which='minor', linestyle=':', linewidth='0.5', color='grey')      
-    axes.grid(True)   
-
-    return  
-
 
 # ------------------------------------------------------------------
 #   Numerics 
@@ -1422,20 +1392,50 @@ def plot_converge_numerics(results, line_color = 'bo-', save_figure = False, sav
     axes = fig.add_subplot(3,1,1)
     axes.plot( segs , np.array(res_nfev) , line_color )
     axes.set_ylabel(r'# of Funct. Evals',axis_font)
-    set_axes(axes)    
+    #set_axes(axes)    
     
     axes = fig.add_subplot(3,1,2)
     axes.plot( segs , np.array(jac_eval) , line_color )
     axes.set_ylabel(r'# of Jacob. Evals',axis_font)
-    set_axes(axes)    
+    #set_axes(axes)    
     
     axes = fig.add_subplot(3,1,3)
     axes.plot( segs , np.array(iters) , line_color )
     axes.set_ylabel(r'# of Iter.',axis_font)
-    set_axes(axes)    
+    #set_axes(axes)    
             
     if save_figure:
         plt.savefig(save_filename + file_type)
         
     return
+
+# ------------------------------------------------------------------
+#   Set Axis Parameters 
+# ------------------------------------------------------------------
+## @ingroup Plots
+def set_axes(axes):
+    """This sets the axis parameters for all plots
+
+    Assumptions:
+    None
+
+    Source:
+    None
+
+    Inputs
+    axes
+        
+    Outputs: 
+    axes
+
+    Properties Used:
+    N/A	
+    """   
+    
+    axes.minorticks_on()
+    axes.grid(which='major', linestyle='-', linewidth='0.5', color='grey')
+    axes.grid(which='minor', linestyle=':', linewidth='0.5', color='grey')      
+    axes.grid(True)   
+
+    return  
 
