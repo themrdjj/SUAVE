@@ -42,6 +42,19 @@ def converge_root(segment):
     
     unknowns = segment.state.unknowns.pack_array()
     
+    # Find the normalization factor for the unknowns and normalize
+    segment.state.unknowns_normalization_factor = 1*unknowns
+    unknowns_in = unknowns/segment.state.unknowns_normalization_factor
+    
+    ## Run one iteration to get the scaling and normalize residuals
+    segment.process.iterate(segment)
+    res = segment.state.residuals.pack_array() 
+    segment.state.residual_normalization_factor = 1/res
+    #segment.state.residual_normalization_factor = np.multiply(segment.state.residuals.pack_array(),(np.random.random(np.shape(unknowns))+0.5))
+    #segment.state.residual_normalization_factor[segment.state.residual_normalization_factor==0] = 1e-16
+
+        
+    
     try:
         root_finder = segment.settings.root_finder
     except AttributeError:
@@ -49,7 +62,7 @@ def converge_root(segment):
     
     if segment.use_Jacobian: 
         unknowns,infodict,ier,msg = root_finder( iterate,
-                                             unknowns,
+                                             unknowns_in,
                                              args = segment,
                                              xtol = segment.state.numerics.tolerance_solution,
                                              fprime = FD_jacobian,
@@ -57,7 +70,7 @@ def converge_root(segment):
                                              full_output = 1)
     else:
         unknowns,infodict,ier,msg = root_finder( iterate,
-                                               unknowns,
+                                               unknowns_in,
                                                args = segment,
                                                xtol = segment.state.numerics.tolerance_solution,
                                                maxfev = segment.state.numerics.max_evaluations,
@@ -83,7 +96,7 @@ def converge_root(segment):
 # ----------------------------------------------------------------------
 
 ## @ingroup Methods-Missions-Segments
-def iterate(unknowns, segment):
+def iterate(unknowns_in, segment):
     
     """Runs one iteration of of all analyses for the mission.
 
@@ -103,6 +116,9 @@ def iterate(unknowns, segment):
     Properties Used:
     N/A
     """       
+    
+    unknowns = unknowns_in*segment.state.unknowns_normalization_factor
+    
     if isinstance(unknowns,array_type):
         segment.state.unknowns.unpack_array(unknowns)
     else:
@@ -111,8 +127,12 @@ def iterate(unknowns, segment):
     segment.process.iterate(segment)
     
     residuals = segment.state.residuals.pack_array()
+    
+    residuals_normalized = residuals*segment.state.residual_normalization_factor    
         
-    return residuals 
+    return residuals_normalized 
+    
+    #return residuals
 
 
 ## @ingroup Methods-Missions-Segments
@@ -153,11 +173,9 @@ def FD_jacobian(unknowns, segment):
         else:
             segment.state.unknowns = unk
             
-        segment.process.iterate(segment)
-    
-        residuals = segment.state.residuals.pack_array()
+        residuals = iterate(unknowns, segment)
         jacobian[:,ii] = (residuals-base_line)/H
-    
+        
     segment.state.numerics.jacobian_evaluations += 1
-    
+        
     return jacobian

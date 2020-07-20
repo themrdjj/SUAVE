@@ -17,6 +17,8 @@ from SUAVE.Methods.Weights.Buildups.Electric_Lift_Cruise.empty import empty
 import sys 
 import numpy as np  
 
+import time
+
 sys.path.append('../Vehicles')
 # the analysis functions
  
@@ -39,16 +41,20 @@ def main():
     mission   = analyses.mission  
     
     # evaluate mission     
+    t1 = time.time()
     results   = mission.evaluate()
-        
+    t2 = time.time()
+    print('Elapsed Time')
+    print(t2-t1)
+    
     # plot results
-    plot_mission(results,configs)
+    #plot_mission(results,configs)
       
     # save, load and plot old results 
     #save_stopped_rotor_results(results)
-    old_results = load_stopped_rotor_results()
-    plot_mission(old_results,configs, 'k-')
-    plt.show(block=True)    
+    #old_results = load_stopped_rotor_results()
+    #plot_mission(old_results,configs, 'k-')
+    #plt.show(block=True)    
     
     # RPM of rotor check during hover
     RPM        = results.segments.climb_1.conditions.propulsion.rpm_lift[0][0]
@@ -179,6 +185,7 @@ def mission_setup(analyses,vehicle):
     base_segment.process.iterate.residuals.network           = vehicle.propulsors.lift_cruise.residuals_transition
     base_segment.state.unknowns.battery_voltage_under_load   = vehicle.propulsors.lift_cruise.battery.max_voltage * ones_row(1)  
     base_segment.state.residuals.network                     = 0. * ones_row(2)    
+    base_segment.use_Jacobian = False
 
 
     # VSTALL Calculation

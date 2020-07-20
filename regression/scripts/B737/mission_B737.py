@@ -24,6 +24,7 @@ import numpy as np
 from SUAVE.Methods.Center_of_Gravity.compute_component_centers_of_gravity import compute_component_centers_of_gravity
 
 import sys
+import time
 
 sys.path.append('../Vehicles')
 # the analysis functions
@@ -52,13 +53,20 @@ def main():
  
     # mission analysis
     mission = analyses.missions.base
+    
+    t1 = time.time()
     results = mission.evaluate()
+    
+    t2 = time.time()
+    print('Elapsed Time')
+    print(t2-t1)
+        
 
     # load older results
     #save_results(results)
     old_results = load_results()   
 
-    # plt the old results
+    ## plt the old results
     plot_mission(results)
     plot_mission(old_results,'k-')
     plt.show(block=True)
@@ -139,7 +147,7 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
     aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()
-    aerodynamics.settings.plot_vortex_distribution   = True 
+    #aerodynamics.settings.plot_vortex_distribution   = True 
     aerodynamics.geometry                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)
@@ -272,6 +280,9 @@ def mission_setup(analyses):
 
     # base segment
     base_segment = Segments.Segment()
+    base_segment.state.numerics.tolerance_solution = 1e-6
+    base_segment.state.numerics.max_evaluations    = 10000
+    base_segment.use_Jacobian = False
 
 
     # ------------------------------------------------------------------
