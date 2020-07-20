@@ -53,25 +53,29 @@ def converge_root(segment):
                                              args = segment,
                                              xtol = segment.state.numerics.tolerance_solution,
                                              fprime = FD_jacobian,
+                                             maxfev = segment.state.numerics.max_evaluations,
                                              full_output = 1)
     else:
         unknowns,infodict,ier,msg = root_finder( iterate,
                                                unknowns,
                                                args = segment,
                                                xtol = segment.state.numerics.tolerance_solution,
+                                               maxfev = segment.state.numerics.max_evaluations,
                                                full_output=1)        
-        
+
     if ier!=1:
         print("Segment did not converge. Segment Tag: " + segment.tag)
         print("Error Message:\n" + msg)
         segment.state.numerics.converged = False
+        segment.converged = False
     else:
         segment.state.numerics.converged = True
+        segment.converged = True
          
     # store convergence results 
     segment.state.numerics.info_dict  = infodict
     segment.state.numerics.message    = msg
-    
+
     return
     
 # ----------------------------------------------------------------------
