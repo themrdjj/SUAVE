@@ -5,6 +5,7 @@
 #           May 2019, T. MacDonald 
 #           Mar 2020, M. Clarke
 #           Apr 2020, M. Clarke
+#           Apr 2020, E. Botero
 
 """ setup file for a mission with a 737
 """
@@ -20,15 +21,7 @@ from SUAVE.Plots.Mission_Plots import *
 import matplotlib.pyplot as plt  
 import numpy as np 
 
-import copy, time
-
-from SUAVE.Core import (
-Data, Container,
-)
-
-from SUAVE.Methods.Propulsion.turbofan_sizing import turbofan_sizing
 from SUAVE.Methods.Center_of_Gravity.compute_component_centers_of_gravity import compute_component_centers_of_gravity
-from SUAVE.Methods.Center_of_Gravity.compute_aircraft_center_of_gravity import compute_aircraft_center_of_gravity
 
 import sys
 
@@ -68,12 +61,10 @@ def main():
     # plt the old results
     plot_mission(results)
     plot_mission(old_results,'k-')
-    plt.show(block=True)
+    #plt.show(block=True)
     
     # check the results
     check_results(results,old_results)
-    
-   
 
     return
 
@@ -86,6 +77,7 @@ def full_setup():
 
     # vehicle data
     vehicle  = vehicle_setup()
+    print_wing_segs(vehicle)
     configs  = configs_setup(vehicle)
 
     # vehicle analyses
@@ -140,14 +132,13 @@ def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #  Weights
-    weights = SUAVE.Analyses.Weights.Weights_Tube_Wing()
+    weights = SUAVE.Analyses.Weights.Weights_Transport()
     weights.vehicle = vehicle
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()
-    aerodynamics.settings.plot_vortex_distribution   = True 
+    aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero() 
     aerodynamics.geometry                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)
@@ -227,13 +218,12 @@ def simple_sizing(configs, analyses):
     # weight analysis
     #need to put here, otherwise it won't be updated
     weights = analyses.configs.base.weights
-    breakdown = weights.evaluate()    
-    
+    breakdown = weights.evaluate(method='New SUAVE')    
     
     #compute centers of gravity
     #need to put here, otherwise, results won't be stored
-    compute_component_centers_of_gravity(base,compute_propulsor_origin=True)
-    compute_aircraft_center_of_gravity(base)
+    compute_component_centers_of_gravity(base)
+    base.center_of_gravity()
     
     # diff the new data
     base.store_diff()
@@ -550,6 +540,16 @@ def check_results(new_results,old_results):
     #check_vals(old_results.output,new_results.output)
 
 
+    return
+
+
+
+def print_wing_segs(vehicle):
+    
+    """This prints the wing segments to provide coverage for dataordered printing"""
+    
+    print(vehicle.wings.main_wing.Segments)
+    
     return
 
 
