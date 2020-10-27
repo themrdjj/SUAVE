@@ -113,6 +113,8 @@ def main():
     sys.stdout.write('# --------------------------------------------------------------------- \n')
     sys.stdout.write(' \n')
 
+    t1 = time.time()
+
     # run tests
     all_pass = True
     for module in modules:
@@ -122,6 +124,10 @@ def main():
         else:
             results[module] = '* FAILED'
             all_pass = False
+            
+    t2 = time.time()
+    print('Elapsed Time')
+    print(t2-t1)    
 
     # final report
     sys.stdout.write('# --------------------------------------------------------------------- \n')

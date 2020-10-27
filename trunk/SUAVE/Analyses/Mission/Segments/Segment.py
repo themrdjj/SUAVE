@@ -66,7 +66,7 @@ class Segment(Analysis):
         self.process.finalize              = Process()
         self.process.finalize.post_process = Process()
         
-        self.use_Jacobian                  = True 
+        self.use_Jacobian                  = False 
         
         self.conditions                    = self.state.conditions
         
