@@ -85,7 +85,7 @@ def plot_vehicle(vehicle, save_figure = False, plot_control_points = True, save_
     # -------------------------------------------------------------------------
     # PLOT ENGINE
     # -------------------------------------------------------------------------        
-    propulsor_face_color = 'grey'                
+    propulsor_face_color = 'darkred'                
     propulsor_edge_color = 'black' 
     propulsor_alpha      = 1    
     for propulsor in vehicle.propulsors:    

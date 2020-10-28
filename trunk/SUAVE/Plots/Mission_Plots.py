@@ -469,22 +469,22 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
     fig.set_size_inches(12, 10)
     for segment in results.segments.values(): 
         time     = segment.conditions.frames.inertial.time[:,0] / Units.min
-        airspeed = segment.conditions.freestream.velocity[:,0] 
+        airspeed = segment.conditions.freestream.velocity[:,0] /   Units['mph']  
         theta    = segment.conditions.frames.body.inertial_rotations[:,1,None] / Units.deg
         
-        x        = segment.conditions.frames.inertial.position_vector[:,0]
+        x        = segment.conditions.frames.inertial.position_vector[:,0]/ Units.mile
         y        = segment.conditions.frames.inertial.position_vector[:,1]
         z        = segment.conditions.frames.inertial.position_vector[:,2]
-        altitude = segment.conditions.freestream.altitude[:,0]
+        altitude = segment.conditions.freestream.altitude[:,0] / Units.feet
         
         axes = fig.add_subplot(2,2,1)
         axes.plot(time, altitude, line_color)
-        axes.set_ylabel('Altitude (m)',axis_font)
+        axes.set_ylabel('Altitude (ft)',axis_font)
         set_axes(axes)            
 
         axes = fig.add_subplot(2,2,2)
         axes.plot( time , airspeed , line_color )
-        axes.set_ylabel('Airspeed (m/s)',axis_font)
+        axes.set_ylabel('Airspeed (mph)',axis_font)
         set_axes(axes)
 
         axes = fig.add_subplot(2,2,3)
@@ -494,8 +494,8 @@ def plot_flight_conditions(results, line_color = 'bo-', save_figure = False, sav
         set_axes(axes)   
         
         axes = fig.add_subplot(2,2,4)
-        axes.plot( time , x, 'bo-', time , y, 'go-' , time , z, 'ro-')
-        axes.set_ylabel('Range (m)',axis_font)
+        axes.plot( time , x, 'bo-')
+        axes.set_ylabel('Range (miles)',axis_font)
         axes.set_xlabel('Time (min)',axis_font)
         set_axes(axes)         
         
@@ -538,9 +538,9 @@ def plot_propeller_conditions(results, line_color = 'bo-', save_figure = False, 
     
     for segment in results.segments.values():  
         time   = segment.conditions.frames.inertial.time[:,0] / Units.min
-        rpm    = segment.conditions.propulsion.rpm[:,0] 
+        rpm    = segment.conditions.propulsion.propeller_rpm[:,0] 
         thrust = np.linalg.norm(segment.conditions.frames.body.thrust_force_vector[:,:],axis=1)
-        torque = segment.conditions.propulsion.motor_torque[:,0] 
+        torque = segment.conditions.propulsion.propeller_motor_torque[:,0] 
         tm     = segment.conditions.propulsion.propeller_tip_mach[:,0]
  
         axes = fig.add_subplot(2,2,1)
