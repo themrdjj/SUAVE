@@ -185,15 +185,15 @@ class Vectored_Thrust(Propulsor):
         voltage_open_circuit = battery.voltage_open_circuit
         voltage_under_load   = battery.voltage_under_load    
           
-        conditions.propulsion.rpm                             = rpm
-        conditions.propulsion.current                         = current
+        conditions.propulsion.propeller_rpm                   = rpm 
         conditions.propulsion.battery_draw                    = battery_draw
         conditions.propulsion.battery_energy                  = battery_energy 
-        conditions.propulsion.voltage_open_circuit            = voltage_open_circuit
-        conditions.propulsion.voltage_under_load              = voltage_under_load  
-        conditions.propulsion.motor_torque                    = motor.outputs.torque
+        conditions.propulsion.battery_voltage_open_circuit    = voltage_open_circuit
+        conditions.propulsion.battery_voltage_under_load      = voltage_under_load  
+        conditions.propulsion.propeller_motor_torque          = motor.outputs.torque
         conditions.propulsion.propeller_torque                = Q
-        conditions.propulsion.motor_efficiency                = etam
+        conditions.propulsion.propeller_motor_efficiency      = etam 
+        conditions.propulsion.propeller_thrust                = F *num_engines            
         conditions.propulsion.acoustic_outputs[rotor.tag]     = outputs
         conditions.propulsion.battery_specfic_power           = -battery_draw/battery.mass_properties.mass #Wh/kg
         conditions.propulsion.electronics_efficiency          = -(P*num_engines)/battery_draw   
@@ -278,9 +278,9 @@ class Vectored_Thrust(Propulsor):
         # Here we are going to pack the residuals (torque,voltage) from the network
         
         # Unpack
-        q_motor   = segment.state.conditions.propulsion.motor_torque
+        q_motor   = segment.state.conditions.propulsion.propeller_motor_torque
         q_prop    = segment.state.conditions.propulsion.propeller_torque
-        v_actual  = segment.state.conditions.propulsion.voltage_under_load
+        v_actual  = segment.state.conditions.propulsion.battery_voltage_under_load
         v_predict = segment.state.unknowns.battery_voltage_under_load
         v_max     = self.voltage
         

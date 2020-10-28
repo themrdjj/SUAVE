@@ -288,12 +288,11 @@ class Lift_Cruise(Propulsor):
         # Store network performance  
         conditions.propulsion.battery_draw                      = battery_draw
         conditions.propulsion.battery_energy                    = battery_energy
-        conditions.propulsion.voltage_open_circuit              = voltage_open_circuit
-        conditions.propulsion.voltage_under_load                = voltage_under_load 
+        conditions.propulsion.battery_voltage_open_circuit      = voltage_open_circuit
+        conditions.propulsion.battery_voltage_under_load        = voltage_under_load 
         conditions.propulsion.battery_efficiency                = (battery_draw+battery.resistive_losses)/battery_draw
         conditions.propulsion.payload_efficiency                = (battery_draw+(avionics.outputs.power + payload.outputs.power))/battery_draw            
-        conditions.propulsion.battery_specfic_power             = -battery_draw/battery.mass_properties.mass    # kWh/kg
-        conditions.propulsion.current                           = i_lift + i_forward 
+        conditions.propulsion.battery_specfic_power             = -battery_draw/battery.mass_properties.mass    # kWh/kg 
         conditions.propulsion.electronics_efficiency            = -(P_forward*num_forward+P_lift*num_lift)/battery_draw  
         conditions.propulsion.battery_current                   = current_total
         
@@ -321,6 +320,8 @@ class Lift_Cruise(Propulsor):
         conditions.propulsion.propeller_power_forward           = P_forward*num_forward 
         conditions.propulsion.propeller_rpm                     = propeller_rpm 
         conditions.propulsion.propeller_motor_efficiency        = etam_forward
+        conditions.propulsion.propeller_power                   = P_forward*num_forward
+        conditions.propulsion.propeller_thrust                  = F_forward*num_forward        
         conditions.propulsion.propeller_motor_torque            = propeller_motor.outputs.torque        
         conditions.propulsion.propeller_thrust_coefficient      = Cp_forward 
         conditions.propulsion.propeller_tip_mach                = (propeller_motor.outputs.omega * R_forward)/a

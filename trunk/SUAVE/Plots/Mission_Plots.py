@@ -397,9 +397,9 @@ def plot_electronic_conditions(results, line_color = 'bo-', save_figure = False,
         time           = results.segments[i].conditions.frames.inertial.time[:,0] / Units.min
         power          = results.segments[i].conditions.propulsion.battery_draw[:,0] 
         energy         = results.segments[i].conditions.propulsion.battery_energy[:,0] 
-        volts          = results.segments[i].conditions.propulsion.voltage_under_load[:,0] 
-        volts_oc       = results.segments[i].conditions.propulsion.voltage_open_circuit[:,0]     
-        current        = results.segments[i].conditions.propulsion.current[:,0]      
+        volts          = results.segments[i].conditions.propulsion.battery_voltage_under_load[:,0] 
+        volts_oc       = results.segments[i].conditions.propulsion.battery_voltage_open_circuit[:,0]     
+        current        = results.segments[i].conditions.propulsion.battery_current[:,0]      
         battery_amp_hr = (energy/ Units.Wh )/volts  
         C_rating       = current/battery_amp_hr
         
