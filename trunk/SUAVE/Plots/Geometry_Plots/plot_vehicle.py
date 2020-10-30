@@ -204,7 +204,7 @@ def plot_fuselage(axes, fus ,face_color,edge_color,alpha):
     
     if num_fus_segs > 0:   
         for i_seg in range(num_fus_segs):
-            theta    = np.linspace(0,2*np.pi,tessellation +1)[:-1] 
+            theta    = np.linspace(0,2*np.pi,tessellation)
             a        = fus.Segments[i_seg].width/2            
             b        = fus.Segments[i_seg].height/2 
             r        = np.sqrt((b*np.sin(theta))**2  + (a*np.cos(theta))**2)  
@@ -306,7 +306,13 @@ def plot_propulsor(axes,VD,propulsor,propulsor_face_color,propulsor_edge_color,p
         plot_propeller_geometry(axes,prop,propulsor)
     
         # Generate Nacelle Geoemtry
-        nac_geo = generate_nacelle_points(VD,propulsor, start =  0.2, end = 1.0)
+        try:
+            s = propulsor.nacelle_start 
+            e = propulsor.nacelle_end 
+        except:
+            s = 0.2 
+            e = 1.
+        nac_geo = generate_nacelle_points(VD,propulsor, start = s, end = e)
         
         # Plot Nacel Geometry 
         plot_nacelle(axes,nac_geo,propulsor_face_color,propulsor_edge_color,propulsor_alpha) 
@@ -523,7 +529,7 @@ def generate_nacelle_points(VD,propulsor , start, end):
     x             = np.linspace(-elipse_length/2,elipse_length/2,10)
     y             = np.sqrt((1 - (x**2)/((elipse_length/2)**2))*(h**2))
     nac_height    = y[int(start*10) : int(end*10)]
-    nac_loc       = x[int(start*10) : int(end*10)] +  elipse_length/2
+    nac_loc       = x[int(start*10) : int(end*10)] #+ elipse_length/2
     num_nac_segs  = len(nac_height)
     
     num_p   = len(propulsor.origin)
@@ -536,7 +542,7 @@ def generate_nacelle_points(VD,propulsor , start, end):
         
     for ip in range(num_p): 
         for i_seg in range(num_nac_segs): 
-            theta    = np.linspace(0,2*np.pi,tessellation +1)[:-1] 
+            theta    = np.linspace(0,2*np.pi,tessellation)
             a        = nac_height[i_seg]           
             b        = nac_height[i_seg] 
             r        = np.sqrt((b*np.sin(theta))**2  + (a*np.cos(theta))**2)  

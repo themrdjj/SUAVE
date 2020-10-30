@@ -292,7 +292,8 @@ class Lift_Cruise(Propulsor):
         conditions.propulsion.battery_voltage_under_load        = voltage_under_load 
         conditions.propulsion.battery_efficiency                = (battery_draw+battery.resistive_losses)/battery_draw
         conditions.propulsion.payload_efficiency                = (battery_draw+(avionics.outputs.power + payload.outputs.power))/battery_draw            
-        conditions.propulsion.battery_specfic_power             = -battery_draw/battery.mass_properties.mass    # kWh/kg 
+        conditions.propulsion.battery_specfic_power             = -battery_draw/battery.mass_properties.mass    # kWh/kg
+        conditions.propulsion.current                           = i_lift + i_forward
         conditions.propulsion.electronics_efficiency            = -(P_forward*num_forward+P_lift*num_lift)/battery_draw  
         conditions.propulsion.battery_current                   = current_total
         
@@ -483,7 +484,7 @@ class Lift_Cruise(Propulsor):
         q_rotor_motor     = segment.state.conditions.propulsion.rotor_motor_torque
         q_prop_lift       = segment.state.conditions.propulsion.rotor_torque        
         
-        v_actual        = segment.state.conditions.propulsion.voltage_under_load
+        v_actual        = segment.state.conditions.propulsion.battery_voltage_under_load
         v_predict       = segment.state.unknowns.battery_voltage_under_load
         v_max           = self.voltage        
         
@@ -525,7 +526,7 @@ class Lift_Cruise(Propulsor):
         q_propeller_motor = segment.state.conditions.propulsion.propeller_motor_torque
         q_prop_forward    = segment.state.conditions.propulsion.propeller_torque   
         
-        v_actual          = segment.state.conditions.propulsion.voltage_under_load
+        v_actual          = segment.state.conditions.propulsion.battery_voltage_under_load
         v_predict         = segment.state.unknowns.battery_voltage_under_load
         v_max             = self.voltage        
         
@@ -564,7 +565,7 @@ class Lift_Cruise(Propulsor):
         q_rotor_motor   = segment.state.conditions.propulsion.rotor_motor_torque
         q_prop_lift     = segment.state.conditions.propulsion.rotor_torque        
 
-        v_actual        = segment.state.conditions.propulsion.voltage_under_load
+        v_actual        = segment.state.conditions.propulsion.battery_voltage_under_load
         v_predict       = segment.state.unknowns.battery_voltage_under_load
         v_max           = self.voltage        
         

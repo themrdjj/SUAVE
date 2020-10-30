@@ -542,28 +542,41 @@ def plot_propeller_conditions(results, line_color = 'bo-', save_figure = False, 
         thrust = np.linalg.norm(segment.conditions.frames.body.thrust_force_vector[:,:],axis=1)
         torque = segment.conditions.propulsion.propeller_motor_torque[:,0] 
         tm     = segment.conditions.propulsion.propeller_tip_mach[:,0]
+        Cp     = segment.conditions.propulsion.propeller_power_coefficient[:,0]
+        eta    = segment.conditions.propulsion.throttle[:,0]
  
-        axes = fig.add_subplot(2,2,1)
+        axes = fig.add_subplot(2,3,1)
         axes.plot(time, thrust, line_color)
         axes.set_ylabel('Thrust (N)',axis_font)
         set_axes(axes)
         
-        axes = fig.add_subplot(2,2,2)
+        axes = fig.add_subplot(2,3,2)
         axes.plot(time, rpm, line_color)
         axes.set_ylabel('RPM',axis_font)
         set_axes(axes)
         
-        axes = fig.add_subplot(2,2,3)
+        axes = fig.add_subplot(2,3,3)
         axes.plot(time, torque, line_color )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel('Torque (N-m)',axis_font)
         set_axes(axes)  
         
-        axes = fig.add_subplot(2,2,4)
+        axes = fig.add_subplot(2,3,4)
+        axes.plot( time , eta , line_color )
+        axes.set_ylabel('Throttle',axis_font)
+        set_axes(axes)	 
+        
+        axes = fig.add_subplot(2,3,5)
+        axes.plot(time, Cp, line_color )
+        axes.set_xlabel('Time (mins)',axis_font)
+        axes.set_ylabel('Power Coefficient',axis_font)
+        set_axes(axes)   
+        
+        axes = fig.add_subplot(2,3,6)
         axes.plot(time, tm, line_color )
         axes.set_xlabel('Time (mins)',axis_font)
         axes.set_ylabel('Tip Mach',axis_font)
-        set_axes(axes)     
+        set_axes(axes)   
         
     if save_figure:
         plt.savefig(save_filename + file_type)  
@@ -1133,8 +1146,7 @@ def plot_lift_distribution(results,vehicle, save_figure = False, save_filename =
     n_w        = VD.n_w
     
     axis_font  = {'size':'12'}  	
-    img_idx    = 1	
-    seg_idx    = 1	
+    img_idx    = 1 	
     for segment in results.segments.values():   	
         num_ctrl_pts = len(segment.conditions.frames.inertial.time)	
         for ti in range(num_ctrl_pts):  
@@ -1152,8 +1164,7 @@ def plot_lift_distribution(results,vehicle, save_figure = False, save_filename =
             
             if save_figure: 
                 plt.savefig( save_filename + '_' + str(img_idx) + file_type) 	
-            img_idx += 1	
-        seg_idx +=1
+            img_idx += 1 
         
     return      
  
