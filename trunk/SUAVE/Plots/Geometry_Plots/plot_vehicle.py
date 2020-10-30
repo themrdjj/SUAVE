@@ -289,7 +289,7 @@ def plot_propulsor(axes,VD,propulsor,propulsor_face_color,propulsor_edge_color,p
         plot_propeller_geometry(axes,prop,propulsor)
 
         # Generate Nacelle Geoemtry
-        nac_geo = generate_nacelle_points(VD,propulsor, start =  0.2, end = 1.0)
+        nac_geo = generate_nacelle_points(VD,propulsor)
         
         # Plot Nacel Geometry 
         plot_nacelle(axes,nac_geo,propulsor_face_color,propulsor_edge_color,propulsor_alpha)
@@ -305,14 +305,8 @@ def plot_propulsor(axes,VD,propulsor,propulsor_face_color,propulsor_edge_color,p
         # Generate And Plot Propeller/Rotor Geoemtry   
         plot_propeller_geometry(axes,prop,propulsor)
     
-        # Generate Nacelle Geoemtry
-        try:
-            s = propulsor.nacelle_start 
-            e = propulsor.nacelle_end 
-        except:
-            s = 0.2 
-            e = 1.
-        nac_geo = generate_nacelle_points(VD,propulsor, start = s, end = e)
+        # Generate Nacelle Geoemtry 
+        nac_geo = generate_nacelle_points(VD,propulsor)
         
         # Plot Nacel Geometry 
         plot_nacelle(axes,nac_geo,propulsor_face_color,propulsor_edge_color,propulsor_alpha) 
@@ -501,7 +495,7 @@ def plot_propeller_geometry(axes,prop,propulsor):
                     axes.add_collection3d(prop_collection) 
     return 
 
-def generate_nacelle_points(VD,propulsor , start, end):
+def generate_nacelle_points(VD,propulsor):
     """ This generates the coordinate points on the surface of the fuselage
 
     Assumptions: 
@@ -523,13 +517,14 @@ def generate_nacelle_points(VD,propulsor , start, end):
     
     h = propulsor.nacelle_diameter/2
     l = propulsor.engine_length
-    
+    end = propulsor.nacelle_end
+    start  = propulsor.nacelle_start
     elipse_length = l/(end-start)
     
     x             = np.linspace(-elipse_length/2,elipse_length/2,10)
     y             = np.sqrt((1 - (x**2)/((elipse_length/2)**2))*(h**2))
     nac_height    = y[int(start*10) : int(end*10)]
-    nac_loc       = x[int(start*10) : int(end*10)] #+ elipse_length/2
+    nac_loc       = x[int(start*10) : int(end*10)] + elipse_length*propulsor.nacelle_offset
     num_nac_segs  = len(nac_height)
     
     num_p   = len(propulsor.origin)
