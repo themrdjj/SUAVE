@@ -166,7 +166,6 @@ def empty(vehicle):
 
     # Unpack inputs
     S_gross_w   = vehicle.reference_area
-    fuel        = vehicle.fuel
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     TOW         = vehicle.mass_properties.max_takeoff
@@ -196,14 +195,22 @@ def empty(vehicle):
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
         wt_propulsion                    = propulsors.mass_properties.mass
         if wt_propulsion==0:
+
+
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)    
     #find fuel volume
     if 'fuel' not in vehicle: 
         warnings.warn("fuel mass= 0 ; fuel system volume is calculated incorrectly ", stacklevel=1)   
-        N_tank     = 0 
-        V_fuel     = 0.
-        V_fuel_int = 0.
-      
+        N_tank           = 0 
+        V_fuel           = 0.
+        V_fuel_int       = 0.
+        m_fuel           = 0 
+        try:
+            m_fuel = vehicle.propulsors.battery_propeller.battery.mass_properties.mass
+        except:
+            m_fuel = 0 
+        landing_weight   = TOW
+        
     else:
         m_fuel                      = fuel.mass_properties.mass
         landing_weight              = TOW-m_fuel  #just assume this for now
@@ -243,7 +250,9 @@ def empty(vehicle):
         sweep_h            = vehicle.wings['horizontal_stabilizer'].sweeps.quarter_chord
         mac_h              = vehicle.wings['horizontal_stabilizer'].chords.mean_aerodynamic
         t_c_h              = vehicle.wings['horizontal_stabilizer'].thickness_to_chord
-        l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0] + vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] - vehicle.wings['main_wing'].origin[0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
+        l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0][0] +\
+                             vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] -\
+                             vehicle.wings['main_wing'].origin[0][0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
         wt_tail_horizontal = tail_horizontal(S_h, AR_h, sweep_h, q_c, taper_h, t_c_h,Nult,TOW)                
         
         vehicle.wings['horizontal_stabilizer'].mass_properties.mass = wt_tail_horizontal        
@@ -416,3 +425,4 @@ def empty(vehicle):
 
     #note; air conditioner optional, and weight is added to the air_conditioner object directly
     return output
+

@@ -86,8 +86,8 @@ def empty(config,
     
         nLiftProps          = propulsor.number_of_rotor_engines
         nThrustProps        = propulsor.number_of_propeller_engines
-        nLiftBlades         = propulsor.rotor.number_blades
-        nThrustBlades       = propulsor.propeller.number_blades
+        nLiftBlades         = propulsor.rotor.number_of_blades
+        nThrustBlades       = propulsor.propeller.number_of_blades
         n_lift_motors       = propulsor.number_of_rotor_engines
         n_cruise_motors     = propulsor.number_of_propeller_engines
         
@@ -142,11 +142,11 @@ def empty(config,
     total_wing_weight       = 0.
     for w in config.wings:
         wing_tag = w.tag 
-        if (wing_tag.find('main_wing') != -1):
-            wing_weight = wing(config.wings[w.tag], config, maxLift/5, safety_factor= safety_factor, max_g_load =  max_g_load ) *Units.kg
-            tag = wing_tag
-            output.wings[tag] = wing_weight
-            total_wing_weight = total_wing_weight + wing_weight
+        #if (wing_tag.find('main_wing') != -1):
+        wing_weight = wing(config.wings[w.tag], config, maxLift/5, safety_factor= safety_factor, max_g_load =  max_g_load ) *Units.kg
+        tag = wing_tag
+        output.wings[tag] = wing_weight
+        total_wing_weight = total_wing_weight + wing_weight
     output.total_wing_weight = total_wing_weight
     
     #-------------------------------------------------------------------------------

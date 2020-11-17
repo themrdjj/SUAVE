@@ -55,7 +55,11 @@ def systems(W_uav, V_fuel, V_int, N_tank, N_eng, l_fuselage, span, TOW, Nult, nu
     W_0 = TOW/Units.lb
     
     #fuel system
-    fuel_sys_wt = 2.49*(Q_tot**.726)*((Q_tot/(Q_tot+Q_int))**.363)*(N_tank**.242)*(N_eng**.157)*Units.lb
+    if Q_tot == 0 :
+        fuel_sys_wt = 0
+        
+    else:
+        fuel_sys_wt = 2.49*(Q_tot**.726)*((Q_tot/(Q_tot+Q_int))**.363)*(N_tank**.242)*(N_eng**.157)*Units.lb
 
     #flight controls
     flt_ctrl_wt = .053*(l_fus**1.536)*(b_wing**.371)*((Nult*W_0**(10.**(-4.)))**.8)*Units.lb

@@ -327,7 +327,7 @@ def plot_propeller_geometry(axes,prop,propulsor):
     # unpack
     Rt     = prop.tip_radius          
     Rh     = prop.hub_radius          
-    num_B  = prop.number_blades       
+    num_B  = prop.number_of_blades    
     a_sec  = prop.airfoil_geometry          
     a_secl = prop.airfoil_polar_stations
     beta   = prop.twist_distribution         
