@@ -54,7 +54,7 @@ def empty(vehicle):
                         internal_combustion
                             rated_power - maximum rated power of the internal combustion engine [Watts]
                         
-                    number_engines - integer indicating the number of engines on the aircraft
+                    number_of_engines - integer indicating the number of engines on the aircraft
 
                 wt_cargo - weight of the bulk cargo being carried on the aircraft [kilograms]
                 num_seats - number of seats installed on the aircraft [dimensionless]
@@ -166,6 +166,7 @@ def empty(vehicle):
 
     # Unpack inputs
     S_gross_w   = vehicle.reference_area
+    fuel        = vehicle.fuel
     Nult        = vehicle.envelope.ultimate_load
     Nlim        = vehicle.envelope.limit_load
     TOW         = vehicle.mass_properties.max_takeoff
@@ -187,7 +188,7 @@ def empty(vehicle):
         propulsors.mass_properties.mass  = wt_propulsion 
 
     elif propulsor_name == 'internal_combustion':
-        rated_power                      = propulsors.rated_power/num_eng
+        rated_power                      = propulsors.engine.sea_level_power
         wt_engine_piston                 = Propulsion.engine_piston(rated_power)
         wt_propulsion                    = Propulsion.integrated_propulsion_general_aviation(wt_engine_piston,num_eng)
         propulsors.mass_properties.mass  = wt_propulsion 
@@ -195,22 +196,14 @@ def empty(vehicle):
     else: #propulsor used is not an IC Engine or Turbofan; assume mass_properties defined outside model
         wt_propulsion                    = propulsors.mass_properties.mass
         if wt_propulsion==0:
-
-
             warnings.warn("Propulsion mass= 0 ;e there is no Engine Weight being added to the Configuration", stacklevel=1)    
     #find fuel volume
     if 'fuel' not in vehicle: 
         warnings.warn("fuel mass= 0 ; fuel system volume is calculated incorrectly ", stacklevel=1)   
-        N_tank           = 0 
-        V_fuel           = 0.
-        V_fuel_int       = 0.
-        m_fuel           = 0 
-        try:
-            m_fuel = vehicle.propulsors.battery_propeller.battery.mass_properties.mass
-        except:
-            m_fuel = 0 
-        landing_weight   = TOW
-        
+        N_tank     = 0 
+        V_fuel     = 0.
+        V_fuel_int = 0.
+      
     else:
         m_fuel                      = fuel.mass_properties.mass
         landing_weight              = TOW-m_fuel  #just assume this for now
@@ -250,9 +243,7 @@ def empty(vehicle):
         sweep_h            = vehicle.wings['horizontal_stabilizer'].sweeps.quarter_chord
         mac_h              = vehicle.wings['horizontal_stabilizer'].chords.mean_aerodynamic
         t_c_h              = vehicle.wings['horizontal_stabilizer'].thickness_to_chord
-        l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0][0] +\
-                             vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] -\
-                             vehicle.wings['main_wing'].origin[0][0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
+        l_w2h              = vehicle.wings['horizontal_stabilizer'].origin[0][0] + vehicle.wings['horizontal_stabilizer'].aerodynamic_center[0] - vehicle.wings['main_wing'].origin[0][0] - vehicle.wings['main_wing'].aerodynamic_center[0] #used for fuselage weight
         wt_tail_horizontal = tail_horizontal(S_h, AR_h, sweep_h, q_c, taper_h, t_c_h,Nult,TOW)                
         
         vehicle.wings['horizontal_stabilizer'].mass_properties.mass = wt_tail_horizontal        
@@ -425,4 +416,3 @@ def empty(vehicle):
 
     #note; air conditioner optional, and weight is added to the air_conditioner object directly
     return output
-

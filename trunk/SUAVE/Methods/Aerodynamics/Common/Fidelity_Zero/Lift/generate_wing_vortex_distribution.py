@@ -897,7 +897,7 @@ def generate_wing_vortex_distribution(geometry,settings):
     # --------------------------------------------------------------------------------------- 
     VD.n_fus = 0
     for fus in geometry.fuselages:   
-        VD = generate_fuselage_vortex_distribution(VD,fus,n_cw,n_sw)  
+        VD = generate_fuselage_vortex_distribution(VD,fus,n_cw,n_sw)
          
     VD.n_w        = n_w
     VD.n_sw       = n_sw
@@ -1098,7 +1098,7 @@ def generate_fuselage_vortex_distribution(VD,fus,n_cw,n_sw):
     VD.Y      = np.append(VD.Y  ,fvs_y )
     VD.Z      = np.append(VD.Z  ,fvs_z )     
     
-    return VD 
+    return VD
 
 ## @ingroup Methods-Aerodynamics-Common-Fidelity_Zero-Lift
 def compute_panel_area(VD):
