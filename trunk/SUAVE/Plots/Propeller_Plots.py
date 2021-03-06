@@ -93,3 +93,38 @@ def plot_propeller_performance(prop,outputs,conditions):
     axis0.set_yticklabels([])    
     
     return    
+
+
+def plot_propeller_geometry(prop, save_figure = False, save_filename = "Propeller Geometry, " , file_type = ".png"):
+    # Propellers contains the propellers we wish to plot the blade geometry for.
+    
+    source = prop.tag
+    r_R = prop.radius_distribution / prop.tip_radius
+    t_b = prop.max_thickness_distribution
+    b_D = prop.chord_distribution / (2*prop.tip_radius)
+    beta = prop.twist_distribution / Units.deg
+    
+    fig, ax1 = plt.subplots()
+    fig.set_size_inches(10, 6)
+    ax2 = ax1.twinx()  # instantiate a second axis that shares the same x-axis
+
+    ax1.plot( r_R, t_b, "--", color = "tab:gray", label=source + ', t_b')
+    ax1.plot( r_R, b_D, "--", color = "tab:blue", label=source + ', b_D')
+    ax2.plot( r_R, beta, "--", color= "tab:red", label=source + ', $\\beta$')
+    
+    ax1.set_xlabel("Blade Fractional Radius (r/R)")
+    ax1.set_ylabel("Chord and Thickness Distributions ($b/D$, $t/b$)")
+    ax1.set_title("Blade Geometry") 
+    
+    ax2.set_ylabel("Twist Distribution ($\\beta$)")
+    
+    ax1.grid()
+    fig.legend(loc="upper right", bbox_to_anchor=(1, 1), bbox_transform=ax1.transAxes)
+    fig.tight_layout()
+    #plt.show()
+    
+    if save_figure:
+        save_filename = save_filename + source
+        plt.savefig(save_filename + file_type) 
+        
+    return
