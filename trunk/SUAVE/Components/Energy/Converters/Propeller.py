@@ -417,10 +417,11 @@ class Propeller(Energy_Component):
             Va_2d   = np.repeat(Wa.T[ : , np.newaxis , :], Na, axis=1).T
             Vt_2d   = np.repeat(Wt.T[ : , np.newaxis , :], Na, axis=1).T
     
-            blade_T_distribution_2d  = np.repeat(blade_T_distribution.T[ np.newaxis,:  , :], Na, axis=0).T 
-            blade_Q_distribution_2d  = np.repeat(blade_Q_distribution.T[ np.newaxis,:  , :], Na, axis=0).T 
+            blade_T_distribution_2d  = np.repeat(blade_T_distribution.T[ :, np.newaxis, :], Na, axis=1).T 
+            blade_Q_distribution_2d  = np.repeat(blade_Q_distribution.T[ :, np.newaxis, :], Na, axis=1).T 
             blade_Gamma_2d           = np.repeat(Gamma.T[ : , np.newaxis , :], Na, axis=1).T
-
+            alpha                    = np.repeat(alpha.T[ : , np.newaxis , :], Na, axis=1).T
+            
             Vt_avg                  = Wt
             Va_avg                  = Wa 
             Vt_ind_avg              = vt
