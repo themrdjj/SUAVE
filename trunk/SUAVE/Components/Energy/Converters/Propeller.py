@@ -75,6 +75,7 @@ class Propeller(Energy_Component):
         self.induced_power_factor      = 1.48  #accounts for interference effects
         self.profile_drag_coefficient  = .03     
         self.nonuniform_freestream     = False
+        self.pusher                    = False 
 
     def spin(self,conditions):
         """Analyzes a propeller given geometry and operating conditions.

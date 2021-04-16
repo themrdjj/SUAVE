@@ -142,77 +142,78 @@ def generate_propeller_wake_distribution(prop,thrust_angle,m,VD,init_timestep_of
     total_angle_offset = angle_offset - start_angle_offset
 
     for i in range(num_prop): 
-
-        if (prop.rotation != None) and (prop.rotation[i] == 1):        
-            total_angle_offset = -total_angle_offset    
-
-        azi_y   = np.sin(blade_angle_loc + total_angle_offset)  
-        azi_z   = np.cos(blade_angle_loc + total_angle_offset)
-
-        x0_pts = np.tile(np.atleast_2d(MCA+c/4),(B,1))  
-        x_pts  = np.repeat(np.repeat(x0_pts[np.newaxis,:,  :], number_of_wake_timesteps, axis=0)[ np.newaxis, : ,:, :,], m, axis=0) 
-        X_pts0 = x_pts + sx_inf   
-
-        # compute wake contraction  
-        wake_contraction = compute_wake_contraction_matrix(i,prop,Nr,m,number_of_wake_timesteps,X_pts0)          
-
-        y0_pts = np.tile(np.atleast_2d(r),(B,1))
-        y_pts  = np.repeat(np.repeat(y0_pts[np.newaxis,:,  :], number_of_wake_timesteps, axis=0)[ np.newaxis, : ,:, :,], m, axis=0) 
-        Y_pts0 = (y_pts*wake_contraction)*azi_y  + sy_inf    
-
-        z0_pts = np.tile(np.atleast_2d(r),(B,1))
-        z_pts  = np.repeat(np.repeat(z0_pts[np.newaxis,:,  :], number_of_wake_timesteps, axis=0)[ np.newaxis, : ,:, :,], m, axis=0)
-        Z_pts0 = (z_pts*wake_contraction)*azi_z + sz_inf     
- 
-        # Rotate wake by thrust angle 
-        X_pts  = prop.origin[i][0] + X_pts0*np.cos(-thrust_angle) - Z_pts0*np.sin(-thrust_angle)
-        Y_pts  = prop.origin[i][1] + Y_pts0
-        Z_pts  = prop.origin[i][2] + X_pts0*np.sin(-thrust_angle) + Z_pts0*np.cos(-thrust_angle) 
-
-        # Store points  
-        # ( control point,  prop ,  time step , blade number , location on blade )
-        if (prop.rotation != None) and (prop.rotation[i] == -1):  
-            WD_XA1[:,i,:,:,:] = X_pts[: , :-1 , : , :-1 ]
-            WD_YA1[:,i,:,:,:] = Y_pts[: , :-1 , : , :-1 ]
-            WD_ZA1[:,i,:,:,:] = Z_pts[: , :-1 , : , :-1 ]
-            WD_XA2[:,i,:,:,:] = X_pts[: ,  1: , : , :-1 ]
-            WD_YA2[:,i,:,:,:] = Y_pts[: ,  1: , : , :-1 ]
-            WD_ZA2[:,i,:,:,:] = Z_pts[: ,  1: , : , :-1 ]
-            WD_XB1[:,i,:,:,:] = X_pts[: , :-1 , : , 1:  ]
-            WD_YB1[:,i,:,:,:] = Y_pts[: , :-1 , : , 1:  ]
-            WD_ZB1[:,i,:,:,:] = Z_pts[: , :-1 , : , 1:  ]
-            WD_XB2[:,i,:,:,:] = X_pts[: ,  1: , : , 1:  ]
-            WD_YB2[:,i,:,:,:] = Y_pts[: ,  1: , : , 1:  ]
-            WD_ZB2[:,i,:,:,:] = Z_pts[: ,  1: , : , 1:  ] 
-        else: 
-            WD_XA1[:,i,:,:,:] = X_pts[: , :-1 , : , 1:  ]
-            WD_YA1[:,i,:,:,:] = Y_pts[: , :-1 , : , 1:  ]
-            WD_ZA1[:,i,:,:,:] = Z_pts[: , :-1 , : , 1:  ]
-            WD_XA2[:,i,:,:,:] = X_pts[: ,  1: , : , 1:  ]
-            WD_YA2[:,i,:,:,:] = Y_pts[: ,  1: , : , 1:  ]
-            WD_ZA2[:,i,:,:,:] = Z_pts[: ,  1: , : , 1:  ] 
-            WD_XB1[:,i,:,:,:] = X_pts[: , :-1 , : , :-1 ]
-            WD_YB1[:,i,:,:,:] = Y_pts[: , :-1 , : , :-1 ]
-            WD_ZB1[:,i,:,:,:] = Z_pts[: , :-1 , : , :-1 ]
-            WD_XB2[:,i,:,:,:] = X_pts[: ,  1: , : , :-1 ]
-            WD_YB2[:,i,:,:,:] = Y_pts[: ,  1: , : , :-1 ]
-            WD_ZB2[:,i,:,:,:] = Z_pts[: ,  1: , : , :-1 ]
-
-        WD_GAMMA[:,i,:,:,:] = Gamma 
-
-        # store points for plotting 
-        VD.Wake.XA1[i,:,:,:] =  X_pts[0 , :-1 , : , :-1 ]
-        VD.Wake.YA1[i,:,:,:] =  Y_pts[0 , :-1 , : , :-1 ]
-        VD.Wake.ZA1[i,:,:,:] =  Z_pts[0 , :-1 , : , :-1 ]
-        VD.Wake.XA2[i,:,:,:] =  X_pts[0 ,  1: , : , :-1 ]
-        VD.Wake.YA2[i,:,:,:] =  Y_pts[0 ,  1: , : , :-1 ]
-        VD.Wake.ZA2[i,:,:,:] =  Z_pts[0 ,  1: , : , :-1 ]
-        VD.Wake.XB1[i,:,:,:] =  X_pts[0 , :-1 , : , 1:  ]
-        VD.Wake.YB1[i,:,:,:] =  Y_pts[0 , :-1 , : , 1:  ]
-        VD.Wake.ZB1[i,:,:,:] =  Z_pts[0 , :-1 , : , 1:  ]
-        VD.Wake.XB2[i,:,:,:] =  X_pts[0 ,  1: , : , 1:  ]
-        VD.Wake.YB2[i,:,:,:] =  Y_pts[0 ,  1: , : , 1:  ]
-        VD.Wake.ZB2[i,:,:,:] =  Z_pts[0 ,  1: , : , 1:  ]  
+        if not prop.pusher:
+            
+            if (prop.rotation != None) and (prop.rotation[i] == 1):        
+                total_angle_offset = -total_angle_offset    
+    
+            azi_y   = np.sin(blade_angle_loc + total_angle_offset)  
+            azi_z   = np.cos(blade_angle_loc + total_angle_offset)
+    
+            x0_pts = np.tile(np.atleast_2d(MCA+c/4),(B,1))  
+            x_pts  = np.repeat(np.repeat(x0_pts[np.newaxis,:,  :], number_of_wake_timesteps, axis=0)[ np.newaxis, : ,:, :,], m, axis=0) 
+            X_pts0 = x_pts + sx_inf   
+    
+            # compute wake contraction  
+            wake_contraction = compute_wake_contraction_matrix(i,prop,Nr,m,number_of_wake_timesteps,X_pts0)          
+    
+            y0_pts = np.tile(np.atleast_2d(r),(B,1))
+            y_pts  = np.repeat(np.repeat(y0_pts[np.newaxis,:,  :], number_of_wake_timesteps, axis=0)[ np.newaxis, : ,:, :,], m, axis=0) 
+            Y_pts0 = (y_pts*wake_contraction)*azi_y  + sy_inf    
+    
+            z0_pts = np.tile(np.atleast_2d(r),(B,1))
+            z_pts  = np.repeat(np.repeat(z0_pts[np.newaxis,:,  :], number_of_wake_timesteps, axis=0)[ np.newaxis, : ,:, :,], m, axis=0)
+            Z_pts0 = (z_pts*wake_contraction)*azi_z + sz_inf     
+     
+            # Rotate wake by thrust angle 
+            X_pts  = prop.origin[i][0] + X_pts0*np.cos(-thrust_angle) - Z_pts0*np.sin(-thrust_angle)
+            Y_pts  = prop.origin[i][1] + Y_pts0
+            Z_pts  = prop.origin[i][2] + X_pts0*np.sin(-thrust_angle) + Z_pts0*np.cos(-thrust_angle) 
+    
+            # Store points  
+            # ( control point,  prop ,  time step , blade number , location on blade )
+            if (prop.rotation != None) and (prop.rotation[i] == -1):  
+                WD_XA1[:,i,:,:,:] = X_pts[: , :-1 , : , :-1 ]
+                WD_YA1[:,i,:,:,:] = Y_pts[: , :-1 , : , :-1 ]
+                WD_ZA1[:,i,:,:,:] = Z_pts[: , :-1 , : , :-1 ]
+                WD_XA2[:,i,:,:,:] = X_pts[: ,  1: , : , :-1 ]
+                WD_YA2[:,i,:,:,:] = Y_pts[: ,  1: , : , :-1 ]
+                WD_ZA2[:,i,:,:,:] = Z_pts[: ,  1: , : , :-1 ]
+                WD_XB1[:,i,:,:,:] = X_pts[: , :-1 , : , 1:  ]
+                WD_YB1[:,i,:,:,:] = Y_pts[: , :-1 , : , 1:  ]
+                WD_ZB1[:,i,:,:,:] = Z_pts[: , :-1 , : , 1:  ]
+                WD_XB2[:,i,:,:,:] = X_pts[: ,  1: , : , 1:  ]
+                WD_YB2[:,i,:,:,:] = Y_pts[: ,  1: , : , 1:  ]
+                WD_ZB2[:,i,:,:,:] = Z_pts[: ,  1: , : , 1:  ] 
+            else: 
+                WD_XA1[:,i,:,:,:] = X_pts[: , :-1 , : , 1:  ]
+                WD_YA1[:,i,:,:,:] = Y_pts[: , :-1 , : , 1:  ]
+                WD_ZA1[:,i,:,:,:] = Z_pts[: , :-1 , : , 1:  ]
+                WD_XA2[:,i,:,:,:] = X_pts[: ,  1: , : , 1:  ]
+                WD_YA2[:,i,:,:,:] = Y_pts[: ,  1: , : , 1:  ]
+                WD_ZA2[:,i,:,:,:] = Z_pts[: ,  1: , : , 1:  ] 
+                WD_XB1[:,i,:,:,:] = X_pts[: , :-1 , : , :-1 ]
+                WD_YB1[:,i,:,:,:] = Y_pts[: , :-1 , : , :-1 ]
+                WD_ZB1[:,i,:,:,:] = Z_pts[: , :-1 , : , :-1 ]
+                WD_XB2[:,i,:,:,:] = X_pts[: ,  1: , : , :-1 ]
+                WD_YB2[:,i,:,:,:] = Y_pts[: ,  1: , : , :-1 ]
+                WD_ZB2[:,i,:,:,:] = Z_pts[: ,  1: , : , :-1 ]
+    
+            WD_GAMMA[:,i,:,:,:] = Gamma 
+    
+            # store points for plotting 
+            VD.Wake.XA1[i,:,:,:] =  X_pts[0 , :-1 , : , :-1 ]
+            VD.Wake.YA1[i,:,:,:] =  Y_pts[0 , :-1 , : , :-1 ]
+            VD.Wake.ZA1[i,:,:,:] =  Z_pts[0 , :-1 , : , :-1 ]
+            VD.Wake.XA2[i,:,:,:] =  X_pts[0 ,  1: , : , :-1 ]
+            VD.Wake.YA2[i,:,:,:] =  Y_pts[0 ,  1: , : , :-1 ]
+            VD.Wake.ZA2[i,:,:,:] =  Z_pts[0 ,  1: , : , :-1 ]
+            VD.Wake.XB1[i,:,:,:] =  X_pts[0 , :-1 , : , 1:  ]
+            VD.Wake.YB1[i,:,:,:] =  Y_pts[0 , :-1 , : , 1:  ]
+            VD.Wake.ZB1[i,:,:,:] =  Z_pts[0 , :-1 , : , 1:  ]
+            VD.Wake.XB2[i,:,:,:] =  X_pts[0 ,  1: , : , 1:  ]
+            VD.Wake.YB2[i,:,:,:] =  Y_pts[0 ,  1: , : , 1:  ]
+            VD.Wake.ZB2[i,:,:,:] =  Z_pts[0 ,  1: , : , 1:  ]  
 
     # Compress Data into 1D Arrays  
     mat4_size = (m,num_prop,(number_of_wake_timesteps-1),B*n)

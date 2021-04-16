@@ -56,9 +56,9 @@ def compute_RHS_matrix(n_sw,n_cw,delta,phi,conditions,geometry,propeller_wake_mo
     num_ctrl_pts     = len(aoa) # number of control points      
     
     for propulsor in geometry.propulsors:
-            if propeller_wake_model:
+            if propeller_wake_model and not propulsor.propeller.pusher:
                 if 'propeller' in propulsor.keys():
-                    # extract the propeller data struction
+                    # extract the propeller data structure
                     prop = propulsor.propeller
 
                     # generate the geometry of the propeller helical wake
@@ -76,7 +76,8 @@ def compute_RHS_matrix(n_sw,n_cw,delta,phi,conditions,geometry,propeller_wake_mo
 
                     # generate the geometry of the propeller helical wake
                     wake_distribution, dt,time_steps,num_blades, num_radial_stations = generate_propeller_wake_distribution(rot,propulsor.thrust_angle,num_ctrl_pts,\
-                                                                                                                            VD,initial_timestep_offset,wake_development_time)
+                                                                                                                            VD,initial_timestep_offset,wake_development_time,\
+                                                                                                                            number_of_wake_timesteps)
 
                     # compute the induced velocity
                     rot_V_wake_ind = compute_wake_induced_velocity(wake_distribution,VD,num_ctrl_pts)
