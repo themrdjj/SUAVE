@@ -12,7 +12,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
-from SUAVE.Core import Data
+from SUAVE.Core import Data, Units
 from SUAVE.Methods.Geometry.Three_Dimensional \
      import  orientation_product, orientation_transpose
 
@@ -332,7 +332,10 @@ class Propeller(Energy_Component):
             
             # Compute aerodynamic forces based on specified input airfoil or using a surrogate
             Cl, Cdval = compute_aerodynamic_forces(a_loc, a_geo, cl_sur, cd_sur, ctrl_pts, Nr, Na, Re, Ma, alpha, tc, use_2d_analysis)
-
+            
+            # Apply 3D correction to surrogates for rotating propeller:
+            Cl = correction_3d(Cl, alpha,c,chi,Na,ctrl_pts,use_2d_analysis)
+          
             Rsquiggly   = Gamma - 0.5*W*c*Cl
         
             # An analytical derivative for dR_dpsi, this is derived by taking a derivative of the above equations
@@ -360,21 +363,32 @@ class Propeller(Energy_Component):
             dpsi        = -Rsquiggly/dR_dpsi
             PSI         = PSI + dpsi
             diff        = np.max(abs(PSIold-PSI))
-            PSIold      = PSI
         
             # omega = 0, do not run BEMT convergence loop 
             if all(omega[:,0]) == 0. :
                 break
             
-            # If its really not going to converge
-            if np.any(PSI>pi/2) and np.any(dpsi>0.0):
-                print("Propeller BEMT did not converge to a solution (Stall)")
-                break
-        
+            ## If its really not going to converge
+            #if np.any(PSI>pi/2) and np.any(dpsi>0.0):
+                #print("Propeller BEMT did not converge to a solution (Stall)")
+                #break
+            converged = np.zeros(size)
+            differences = abs(PSI-PSIold)
+            converged[differences<tol] = 1
+            if use_2d_analysis:
+                J_sum = np.sum(np.sum(converged,axis=1),axis=1)
+            else:
+                J_sum = np.sum(converged,axis=1)
+            J_converged = np.zeros(ctrl_pts)
+            J_converged[J_sum==Nr*Na] = 1  
+            
             ii+=1 
             if ii>10000:
                 print("Propeller BEMT did not converge to a solution (Iteration Limit)")
+
                 break
+            
+            PSIold      = PSI
     
         # More Cd scaling from Mach from AA241ab notes for turbulent skin friction
         Tw_Tinf     = 1. + 1.78*(Ma*Ma)
@@ -459,6 +473,11 @@ class Propeller(Energy_Component):
         Ct[omega==0.0]                                     = 0.0
         Cp[omega==0.0]                                     = 0.0 
         etap[omega==0.0]                                   = 0.0 
+        
+        Cq[J_converged==0] = 0.
+        Ct[J_converged==0] = 0.
+        Cp[J_converged==0] = 0.
+        etap[J_converged==0] = 0.
         
         # assign efficiency to network
         conditions.propulsion.etap = etap   
@@ -604,3 +623,30 @@ def compute_aerodynamic_forces(a_loc, a_geo, cl_sur, cd_sur, ctrl_pts, Nr, Na, R
         Cdval[alpha>=np.pi/2] = 2.    
         
     return Cl, Cdval
+
+def correction_3d(cl_2d, alpha, c, r, Na, ctrl_pts, use_2d_analysis):
+    
+    cl_3d       = cl_2d
+    
+    cl_0        = 0 #np.interp(0,alpha,cl_2d)
+    alpha_0     = 0 #np.interp(0,cl_2d,alpha)
+    
+    cl_inviscid = 2*np.pi*alpha + cl_0
+    
+    c_r = c/r
+    f_c_r = np.tanh(7.83*c_r**2 + 9.65*c_r)
+    
+    if use_2d_analysis:
+        f_c_r = np.tile(np.tile(f_c_r,(Na,1)),(ctrl_pts,1,1))
+    else:
+        f_c_r = np.tile(f_c_r,(ctrl_pts,1))     
+
+    alpha_lower = alpha_0 - 10*Units.deg
+    alpha_upper = 12*Units.deg    
+    # High alpha correction:
+    cl_3d[alpha>alpha_upper] = cl_2d[alpha>alpha_upper] + f_c_r[alpha>alpha_upper]*(cl_inviscid[alpha>alpha_upper]-cl_2d[alpha>alpha_upper])
+    
+    # Low (negative) alpha correction:
+    cl_3d[alpha<alpha_lower] = cl_2d[alpha<alpha_lower] - f_c_r[alpha<alpha_lower]*(cl_inviscid[alpha<alpha_lower]-cl_2d[alpha<alpha_lower])
+    
+    return cl_3d  
