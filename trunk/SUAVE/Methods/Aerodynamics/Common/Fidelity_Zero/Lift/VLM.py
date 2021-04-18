@@ -336,5 +336,6 @@ def VLM(conditions,settings,geometry):
     
     VLM_outputs = Data()
     VLM_outputs.gamma = gamma
+    VLM_outputs.VD    = VD
     
     return CL, CDi, CM, CL_wing, CDi_wing, cl_y, cdi_y, alpha_i, CP, Velocity_Profile, VLM_outputs
