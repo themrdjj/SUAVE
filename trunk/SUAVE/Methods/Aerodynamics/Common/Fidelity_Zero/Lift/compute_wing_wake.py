@@ -15,7 +15,7 @@ from SUAVE.Methods.Aerodynamics.Common.Fidelity_Zero.Lift.compute_wing_induced_v
 from SUAVE.Methods.Aerodynamics.Common.Fidelity_Zero.Lift.generate_wing_wake_grid import generate_wing_wake_grid
 
 
-def compute_wing_wake(geometry, conditions, x, grid_settings, VLM_settings, viscous_wake=True, plot_wake=True):
+def compute_wing_wake(geometry, conditions, x, grid_settings, VLM_settings, viscous_wake=True, plot_grid=False, plot_wake=False):
     """
      Computes the wing-induced velocities at a given x-plane.
      
@@ -69,7 +69,7 @@ def compute_wing_wake(geometry, conditions, x, grid_settings, VLM_settings, visc
     # ------------------------------------------------------------------------------------
     #          Generate grid points to evaluate wing induced velocities at
     # ------------------------------------------------------------------------------------ 
-    grid_points = generate_wing_wake_grid(geometry, H, L, hf, x, plot_grid=True)
+    grid_points = generate_wing_wake_grid(geometry, H, L, hf, x, plot_grid=plot_grid)
     cp_XC = grid_points.XC
     cp_YC = grid_points.YC
     cp_ZC = grid_points.ZC
@@ -82,9 +82,9 @@ def compute_wing_wake(geometry, conditions, x, grid_settings, VLM_settings, visc
     # Compute wing induced velocity    
     #----------------------------------------------------------------------------------------------    
     C_mn, _, _, _, _ = compute_wing_induced_velocity(VD,VLM_settings.number_spanwise_vortices,VLM_settings.number_chordwise_vortices,aoa,mach)     
-    u_inviscid = (C_mn[:,:,:,0]@gammaT)[:,:,0]
-    v_inviscid = (C_mn[:,:,:,1]@gammaT)[:,:,0]
-    w_inviscid = (C_mn[:,:,:,2]@gammaT)[:,:,0]     
+    u_inviscid = (C_mn[:,:,:,0]@gammaT)[0,:,0]
+    v_inviscid = (C_mn[:,:,:,1]@gammaT)[0,:,0]
+    w_inviscid = (C_mn[:,:,:,2]@gammaT)[0,:,0]     
     
     #----------------------------------------------------------------------------------------------
     # Impart the wake deficit from BL of wing if x is behind the wing
@@ -130,23 +130,30 @@ def compute_wing_wake(geometry, conditions, x, grid_settings, VLM_settings, visc
         yplot = grid_points.zline
         zplot_w = np.reshape(w, (len(grid_points.yline),len(grid_points.zline))).T
         zplot_u = np.reshape(u, (len(grid_points.yline),len(grid_points.zline))).T
+        zplot_v = np.reshape(v, (len(grid_points.yline),len(grid_points.zline))).T
+           
         
-        fig  = plt.figure()
-        axes = fig.add_subplot(1,1,1)
+        fig  = plt.figure(figsize=(10,4))
+        axes = fig.add_subplot(131)
         a = axes.contourf(xplot,yplot,zplot_w, levels=100,cmap='hot')
         axes.set_xlabel('$\dfrac{2y}{b}$')
         axes.set_ylabel('z')
-        axes.set_title("Downwash, w")
-        plt.colorbar(a,ax=axes)
+        axes.set_title("Downwash Induced Velocity, w")
+        plt.colorbar(a,ax=axes,orientation='horizontal')
         
-        fig  = plt.figure()
-        axes = fig.add_subplot(1,1,1)
+        axes = fig.add_subplot(132)
         a = axes.contourf(xplot,yplot,zplot_u, levels=100,cmap='gist_heat')
         axes.set_xlabel('$\dfrac{2y}{b}$')
         axes.set_ylabel('z')
-        axes.set_title("Axial Induced Velocity, u")
-        plt.colorbar(a,ax=axes)
-        plt.show()
+        axes.set_title("Streamwise Induced Velocity, u")
+        plt.colorbar(a,ax=axes,orientation='horizontal')
+        
+        axes = fig.add_subplot(133)
+        a = axes.contourf(xplot,yplot,zplot_v, levels=100,cmap='gist_heat')
+        axes.set_xlabel('$\dfrac{2y}{b}$')
+        axes.set_ylabel('z')
+        axes.set_title("Spanwise Induced Velocity, v")
+        plt.colorbar(a,ax=axes,orientation='horizontal')        
     
     
     return wing_wake

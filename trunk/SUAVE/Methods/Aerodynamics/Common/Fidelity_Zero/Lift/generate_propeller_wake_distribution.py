@@ -11,10 +11,9 @@
 import numpy as np
 from SUAVE.Core import Data 
 from SUAVE.Methods.Aerodynamics.Common.Fidelity_Zero.Lift.compute_wake_contraction_matrix import compute_wake_contraction_matrix
-from SUAVE.Methods.Geometry.Three_Dimensional import  orientation_product, orientation_transpose
 
 ## @ingroup Methods-Aerodynamics-Common-Fidelity_Zero-Lift   
-def generate_propeller_wake_distribution(prop,thrust_angle,m,VD,init_timestep_offset, time, number_of_wake_timesteps ): 
+def generate_propeller_wake_distribution(prop,m,VD,init_timestep_offset, time, number_of_wake_timesteps ): 
     """ This generates the propeller wake control points used to compute the 
     influence of the wake
 
@@ -41,7 +40,8 @@ def generate_propeller_wake_distribution(prop,thrust_angle,m,VD,init_timestep_of
     c            = prop.chord_distribution 
     Na           = prop.outputs.number_azimuthal_stations
     Nr           = prop.outputs.number_radial_stations
-    omega        = prop.outputs.omega                               
+    omega        = prop.outputs.omega                  
+    thrust_angle = prop.thrust_angle
     va           = prop.outputs.disc_axial_induced_velocity 
     V_inf        = prop.outputs.velocity
     MCA          = prop.mid_chord_alignment 

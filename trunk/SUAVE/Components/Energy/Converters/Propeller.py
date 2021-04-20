@@ -12,7 +12,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 from SUAVE.Components.Energy.Energy_Component import Energy_Component
-from SUAVE.Core import Data, Units
+from SUAVE.Core import Data
 from SUAVE.Methods.Geometry.Three_Dimensional \
      import  orientation_product, orientation_transpose
 
@@ -28,25 +28,19 @@ class Propeller(Energy_Component):
     
     Assumptions:
     None
-
     Source:
     None
     """     
     def __defaults__(self):
         """This sets the default values for the component to function.
-
         Assumptions:
         None
-
         Source:
         N/A
-
         Inputs:
         None
-
         Outputs:
         None
-
         Properties Used:
         None
         """         
@@ -75,21 +69,18 @@ class Propeller(Energy_Component):
         self.induced_power_factor      = 1.48  #accounts for interference effects
         self.profile_drag_coefficient  = .03     
         self.nonuniform_freestream     = False
-        self.pusher                    = False 
+        self.pusher                    = False
 
     def spin(self,conditions):
         """Analyzes a propeller given geometry and operating conditions.
-
         Assumptions:
         per source
-
         Source:
         Drela, M. "Qprop Formulation", MIT AeroAstro, June 2006
         http://web.mit.edu/drela/Public/web/qprop/qprop_theory.pdf
         
         Leishman, Gordon J. Principles of helicopter aerodynamics
         Cambridge university press, 2006.      
-
         Inputs:
         self.inputs.omega                    [radian/s]
         conditions.freestream.               
@@ -333,10 +324,7 @@ class Propeller(Energy_Component):
             
             # Compute aerodynamic forces based on specified input airfoil or using a surrogate
             Cl, Cdval = compute_aerodynamic_forces(a_loc, a_geo, cl_sur, cd_sur, ctrl_pts, Nr, Na, Re, Ma, alpha, tc, use_2d_analysis)
-            
-            # Apply 3D correction to surrogates for rotating propeller:
-            Cl = correction_3d(Cl, alpha,c,chi,Na,ctrl_pts,use_2d_analysis)
-          
+
             Rsquiggly   = Gamma - 0.5*W*c*Cl
         
             # An analytical derivative for dR_dpsi, this is derived by taking a derivative of the above equations
@@ -364,32 +352,21 @@ class Propeller(Energy_Component):
             dpsi        = -Rsquiggly/dR_dpsi
             PSI         = PSI + dpsi
             diff        = np.max(abs(PSIold-PSI))
+            PSIold      = PSI
         
             # omega = 0, do not run BEMT convergence loop 
             if all(omega[:,0]) == 0. :
                 break
             
-            ## If its really not going to converge
-            #if np.any(PSI>pi/2) and np.any(dpsi>0.0):
-                #print("Propeller BEMT did not converge to a solution (Stall)")
-                #break
-            converged = np.zeros(size)
-            differences = abs(PSI-PSIold)
-            converged[differences<tol] = 1
-            if use_2d_analysis:
-                J_sum = np.sum(np.sum(converged,axis=1),axis=1)
-            else:
-                J_sum = np.sum(converged,axis=1)
-            J_converged = np.zeros(ctrl_pts)
-            J_converged[J_sum==Nr*Na] = 1  
-            
+            # If its really not going to converge
+            if np.any(PSI>pi/2) and np.any(dpsi>0.0):
+                print("Propeller BEMT did not converge to a solution (Stall)")
+                break
+        
             ii+=1 
             if ii>10000:
                 print("Propeller BEMT did not converge to a solution (Iteration Limit)")
-
                 break
-            
-            PSIold      = PSI
     
         # More Cd scaling from Mach from AA241ab notes for turbulent skin friction
         Tw_Tinf     = 1. + 1.78*(Ma*Ma)
@@ -408,6 +385,7 @@ class Propeller(Energy_Component):
             blade_T_distribution_2d = blade_T_distribution
             blade_Q_distribution_2d = blade_Q_distribution
             blade_Gamma_2d = Gamma
+            alpha_2d       = alpha
             
             # set 1d blade loadings to be the average:
             blade_T_distribution    = np.mean((blade_T_distribution_2d), axis = 1)
@@ -427,10 +405,10 @@ class Propeller(Energy_Component):
             Va_2d   = np.repeat(Wa.T[ : , np.newaxis , :], Na, axis=1).T
             Vt_2d   = np.repeat(Wt.T[ : , np.newaxis , :], Na, axis=1).T
     
-            blade_T_distribution_2d  = np.repeat(blade_T_distribution.T[ np.newaxis,:  , :], Na, axis=0).T 
-            blade_Q_distribution_2d  = np.repeat(blade_Q_distribution.T[ np.newaxis,:  , :], Na, axis=0).T 
+            blade_T_distribution_2d  = np.repeat(blade_T_distribution[ np.newaxis,:  , :], Na, axis=1)
+            blade_Q_distribution_2d  = np.repeat(blade_Q_distribution[ np.newaxis,:  , :], Na, axis=1)
             blade_Gamma_2d           = np.repeat(Gamma.T[ : , np.newaxis , :], Na, axis=1).T
-
+            alpha_2d                 = np.repeat(alpha[ np.newaxis,:  , :], Na, axis=1)
             Vt_avg                  = Wt
             Va_avg                  = Wa 
             Vt_ind_avg              = vt
@@ -475,11 +453,6 @@ class Propeller(Energy_Component):
         Cp[omega==0.0]                                     = 0.0 
         etap[omega==0.0]                                   = 0.0 
         
-        Cq[J_converged==0] = 0.
-        Ct[J_converged==0] = 0.
-        Cp[J_converged==0] = 0.
-        etap[J_converged==0] = 0.
-        
         # assign efficiency to network
         conditions.propulsion.etap = etap   
         
@@ -522,7 +495,7 @@ class Propeller(Energy_Component):
                     power                             = power,
                     power_coefficient                 = Cp,    
                     converged_inflow_ratio            = lamdaw,
-                    disc_local_angle_of_attack        = alpha
+                    disc_local_angle_of_attack        = alpha_2d
             ) 
     
         return thrust, torque, power, Cp, outputs , etap
@@ -549,13 +522,10 @@ def compute_aerodynamic_forces(a_loc, a_geo, cl_sur, cd_sur, ctrl_pts, Nr, Na, R
     number and local angle of attack. 
     
     If the airfoils are not specified, an approximation is used.
-
     Assumptions:
     N/A
-
     Source:
     N/A
-
     Inputs:
     a_loc                      Locations of specified airfoils                 [-]
     a_geo                      Geometry of specified airfoil                   [-]

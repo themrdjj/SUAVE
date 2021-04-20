@@ -3,7 +3,7 @@ import pylab as plt
 from SUAVE.Core import Data
 
 
-def generate_wing_wake_grid(geometry, H, L, hf, x_plane, Nzo=20, Nzf=35, Nyo=20, plot_grid=True):
+def generate_wing_wake_grid(geometry, H, L, hf, x_plane, Nzo=20, Nzf=35, Nyo=20, plot_grid=False):
     """ Generates the grid points for evaluating the viscous wing wake in a downstream plane.
     Uses smaller grid near the wing to better capture boundary layer.
     
@@ -84,6 +84,5 @@ def generate_wing_wake_grid(geometry, H, L, hf, x_plane, Nzo=20, Nzf=35, Nyo=20,
         axes.set_xlabel('y [m]')
         axes.set_ylabel("z [m]")
         axes.set_title("New Grid Points")
-        plt.show()
     
     return grid_points
