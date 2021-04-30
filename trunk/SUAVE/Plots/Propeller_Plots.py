@@ -1,9 +1,11 @@
 ## @ingroup Plots
 # Propeller_Plots.py
 #
-# Created: Mar 2021, R. Erhard
-# Modified:
+# Created: Mar 2021, R. Erhard 
 
+# ----------------------------------------------------------------------
+#  Imports
+# ----------------------------------------------------------------------
 from SUAVE.Core import Units
 import pylab as plt
 import numpy as np
