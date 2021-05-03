@@ -14,7 +14,7 @@ import os
 def main():
     ospath        = os.path.abspath(__file__)
     separator     = os.path.sep
-    airfoils_path = ospath.split('airfoil_import' + separator + 'airfoil_interpolation_test.py')[0] + 'Vehicles/Airfoils' + separator
+    airfoils_path = ospath.split('airfoil_analysis' + separator + 'airfoil_interpolation_test.py')[0] + 'Vehicles/Airfoils' + separator
     a_labels      = ["Clark_y", "E63"]
     nairfoils     = 4   # number of total airfoils
     

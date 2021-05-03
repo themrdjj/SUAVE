@@ -159,9 +159,9 @@ def main():
     prop_VSP.design_thrust              = 40.     
     prop_VSP.symmetry                   = False 
     
-    prop_VSP.airfoil_geometry           = ['../Vehicles/Clark_y.txt']
-    prop_VSP.airfoil_polars             = [['../Vehicles/Clark_y_polar_Re_50000.txt','../Vehicles/Clark_y_polar_Re_100000.txt','../Vehicles/Clark_y_polar_Re_200000.txt',
-                                            '../Vehicles/Clark_y_polar_Re_500000.txt','../Vehicles/Clark_y_polar_Re_1000000.txt']]  
+    prop_VSP.airfoil_geometry           = [ '../Vehicles/Airfoils/Clark_y.txt']
+    prop_VSP.airfoil_polars             = [['../Vehicles/Airfoils/Clark_y_polar_Re_50000.txt' ,'../Vehicles/Airfoils/Clark_y_polar_Re_100000.txt','../Vehicles/Airfoils/Clark_y_polar_Re_200000.txt',
+                                            '../Vehicles/Airfoils/Clark_y_polar_Re_500000.txt','../Vehicles/Airfoils/Clark_y_polar_Re_1000000.txt']]  
     prop_VSP.airfoil_polar_stations     = list(np.zeros(len(prop_VSP.radius_distribution))) 
     airfoil_polars                      = compute_airfoil_polars(prop_VSP.airfoil_geometry, prop_VSP.airfoil_polars)  
     airfoil_cl_surs                     = airfoil_polars.lift_coefficient_surrogates 

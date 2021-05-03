@@ -16,14 +16,8 @@ from .Mission_Plots   import plot_solar_flux
 from .Mission_Plots   import plot_lift_cruise_network  
 from .Mission_Plots   import plot_propeller_conditions 
 from .Mission_Plots   import plot_surface_pressure_contours
-from .Mission_Plots   import create_video_frames
-                      
-<<<<<<< HEAD
-from .Propeller_Plots import plot_propeller_performance 
-=======
+from .Mission_Plots   import create_video_frames 
 from .Airfoil_Plots   import plot_airfoil_properties
->>>>>>> 1c5e993a00bacea3741d50a897f509463a08e3da
-
 from .Propeller_Plots import plot_propeller_performance
 from . import Geometry_Plots  
 
