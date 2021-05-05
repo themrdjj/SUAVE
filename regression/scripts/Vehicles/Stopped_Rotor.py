@@ -570,19 +570,19 @@ def vehicle_setup():
     propeller_motor.mass_properties.mass = 2.0  * Units.kg
     propeller_motor.origin               = propeller.origin  
     propeller_motor.propeller_radius     = propeller.tip_radius      
-    propeller_motor.no_load_current      = 2.0  
+    propeller_motor.no_load_current      = 0.1
     propeller_motor                      = size_optimal_motor(propeller_motor,propeller)
     net.propeller_motor                  = propeller_motor
 
     # Rotor (Lift) Motor                        
     rotor_motor                         = SUAVE.Components.Energy.Converters.Motor()
     rotor_motor.efficiency              = 0.95  
-    rotor_motor.nominal_voltage         = bat.max_voltage 
+    rotor_motor.nominal_voltage         = bat.max_voltage * 3/4 
     rotor_motor.mass_properties.mass    = 3. * Units.kg 
     rotor_motor.origin                  = rotor.origin  
     rotor_motor.propeller_radius        = rotor.tip_radius   
     rotor_motor.gearbox_efficiency      = 1.0 
-    rotor_motor.no_load_current         = 4.0   
+    rotor_motor.no_load_current         = 0.1 
     rotor_motor                         = size_optimal_motor(rotor_motor,rotor)
     net.rotor_motor                     = rotor_motor  
 

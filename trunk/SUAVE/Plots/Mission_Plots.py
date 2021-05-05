@@ -1389,18 +1389,19 @@ def plot_noise_level(results, line_color = 'bo-', save_figure = False, save_file
         time   = results.segments[i].conditions.frames.inertial.time[:,0] / Units.min 
         alt    = results.segments[i].conditions.freestream.altitude[:,0] / Units.ft
         SPL    = results.segments[i].conditions.noise.total_SPL_dBA.reshape(dim_ctrl_pts,dim_mic,dim_mic)
-        
         for j in range(dim_mic):
             if i == 0:
                 axes1.plot(time, SPL[:,center_line,j], color = colors[j], label= r'$\phi$ = ' + str(round(angles[j],1)) + r' $\degree$' ) 
             else:
                 axes1.plot(time, SPL[:,center_line,j], color = colors[j]) 
         axes2 = axes1.twinx()
-        axes2.plot(time, alt, 'k-')      
-        axes1.set_ylabel('SPL (dBA)',axis_font)
-        axes1.set_xlabel('Time (min)',axis_font)
-        axes2.set_ylabel('Altitude (ft)',axis_font)  
-    
+        axes2.plot(time, alt, 'k-')   
+        
+    axes2.set_ylim(0, 3000)   
+    axes1.set_ylim(0, 150)           
+    axes1.set_ylabel('SPL (dBA)'    ,axis_font)
+    axes1.set_xlabel('Time (min)'   ,axis_font)
+    axes2.set_ylabel('Altitude (ft)',axis_font)   
     axes1.legend(loc='upper right')        
     if save_figure:
         plt.savefig(save_filename + ".png")  

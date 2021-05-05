@@ -230,8 +230,7 @@ def mission_setup(analyses,vehicle):
     segment.pitch_final     = 5. * Units.degrees
     
     segment.state.unknowns.rotor_power_coefficient          = 0.05 *  ones_row(1)  
-    segment.state.unknowns.throttle_lift                    = 0.9  * ones_row(1)  
-    
+    segment.state.unknowns.throttle_lift                    = 0.9  * ones_row(1) 
     segment.state.unknowns.propeller_power_coefficient      = 0.14 *  ones_row(1) 
     segment.state.unknowns.throttle                         = 0.95  *  ones_row(1) 
     segment.state.residuals.network                         = 0.   *  ones_row(3) 
