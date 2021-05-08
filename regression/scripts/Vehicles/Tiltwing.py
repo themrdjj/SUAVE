@@ -367,9 +367,9 @@ def vehicle_setup():
 
     net.origin = rot.origin 
 
-    vehicle.weight_breakdown  = empty(vehicle)
-    compute_component_centers_of_gravity(vehicle)
-    vehicle.center_of_gravity()
+    #vehicle.weight_breakdown  = empty(vehicle)
+    #compute_component_centers_of_gravity(vehicle)
+    #vehicle.center_of_gravity()
     
     return vehicle
 

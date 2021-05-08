@@ -139,11 +139,11 @@ def empty(config,
     # Fixed Weights
     #-------------------------------------------------------------------------------    
     MTOW                = config.mass_properties.max_takeoff  
-    output.seats        = config.passengers * 15.   * Units.kg
-    output.passengers   = config.passengers * 70.   * Units.kg
+    output.seats        = config.passengers * 10.   * Units.kg
+    output.passengers   = config.passengers * 62.   * Units.kg
     output.avionics     = 15.                       * Units.kg
     output.landing_gear = MTOW * 0.02               * Units.kg
-    output.ECS          = config.passengers * 7.    * Units.kg 
+    output.ECS          = config.passengers * 5.    * Units.kg
 
 
     # Select a length scale depending on what kind of vehicle this is
@@ -238,7 +238,7 @@ def empty(config,
         eta         = motor_efficiency
         rho_ref      = 1.225
         maxVTip      = speed_of_sound * tipMach                            # Prop Tip Velocity 
-        maxLift      = config.mass_properties.max_takeoff * ToverW * 9.81  # Maximum Thrust 
+        maxLift      = MTOW * ToverW * 9.81  # Maximum Thrust
         AvgBladeCD   = 0.012                                               # Average Blade CD
         maxLiftPower = 1.15*maxLift*(k*np.sqrt(maxLift/(2*rho_ref*np.pi*rTipLiftProp**2)) +
                                              rotor_bladeSol*AvgBladeCD/8*maxVTip**3/(maxLift/(rho_ref*np.pi*rTipLiftProp**2)))   
