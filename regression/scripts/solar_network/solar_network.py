@@ -68,15 +68,15 @@ def main():
     
     # Check Results 
     F       = results.segments.cruise1.conditions.frames.body.thrust_force_vector[1,0]
-    rpm     = results.segments.cruise1.conditions.propulsion.rpm[1,0] 
-    current = results.segments.cruise1.conditions.propulsion.current[1,0] 
+    rpm     = results.segments.cruise1.conditions.propulsion.propeller_rpm[1,0]
+    current = results.segments.cruise1.conditions.propulsion.battery_current[1,0]
     energy  = results.segments.cruise1.conditions.propulsion.battery_energy[8,0]  
     
     # Truth results
-    truth_F   = 105.9739114679655
-    truth_rpm = 214.67849625412592
-    truth_i   = 131.33972207434294
-    truth_bat = 195688068.5946845
+    truth_F   = 105.97751059878202
+    truth_rpm = 214.5705559974985
+    truth_i   = 131.33561855929347
+    truth_bat = 195698222.3048672
     
     print('battery energy')
     print(energy)

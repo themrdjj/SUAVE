@@ -14,7 +14,7 @@ from SUAVE.Methods.Aerodynamics.Common.Fidelity_Zero.Lift.generate_propeller_wak
 from SUAVE.Methods.Aerodynamics.Common.Fidelity_Zero.Lift.compute_wake_induced_velocity import compute_wake_induced_velocity
 
 ## @ingroup Methods-Aerodynamics-Common-Fidelity_Zero-Lift 
-def compute_RHS_matrix(n_sw,n_cw,delta,phi,conditions,geometry,propeller_wake_model,initial_timestep_offset,wake_development_time):     
+def compute_RHS_matrix(n_sw,n_cw,delta,phi,conditions,geometry,propeller_wake_model,initial_timestep_offset,wake_development_time,number_of_wake_timesteps):     
     """ This computes the right hand side matrix for the VLM. In this
     function, induced velocites from propeller wake are also included 
     when relevent and where specified     
@@ -58,24 +58,26 @@ def compute_RHS_matrix(n_sw,n_cw,delta,phi,conditions,geometry,propeller_wake_mo
     for propulsor in geometry.propulsors:
             if propeller_wake_model:
                 if 'propeller' in propulsor.keys():
-                    # extract the propeller data struction
+                    # extract the propeller data structure
                     prop = propulsor.propeller
 
                     # generate the geometry of the propeller helical wake
-                    wake_distribution, dt,time_steps,num_blades, num_radial_stations = generate_propeller_wake_distribution(prop,propulsor.thrust_angle,num_ctrl_pts,\
-                                                                                                                            VD,initial_timestep_offset,wake_development_time)
+                    wake_distribution, dt,time_steps,num_blades, num_radial_stations = generate_propeller_wake_distribution(prop,num_ctrl_pts,\
+                                                                                                                            VD,initial_timestep_offset,wake_development_time,\
+                                                                                                                            number_of_wake_timesteps)
 
                     # compute the induced velocity
                     prop_V_wake_ind = compute_wake_induced_velocity(wake_distribution,VD,num_ctrl_pts)
 
                 if 'rotor' in propulsor.keys():
 
-                    # extract the propeller data struction
+                    # extract the propeller data structure
                     rot = propulsor.rotor
 
                     # generate the geometry of the propeller helical wake
-                    wake_distribution, dt,time_steps,num_blades, num_radial_stations = generate_propeller_wake_distribution(rot,propulsor.thrust_angle,num_ctrl_pts,\
-                                                                                                                            VD,initial_timestep_offset,wake_development_time)
+                    wake_distribution, dt,time_steps,num_blades, num_radial_stations = generate_propeller_wake_distribution(rot,num_ctrl_pts,\
+                                                                                                                            VD,initial_timestep_offset,wake_development_time,\
+                                                                                                                            number_of_wake_timesteps)
 
                     # compute the induced velocity
                     rot_V_wake_ind = compute_wake_induced_velocity(wake_distribution,VD,num_ctrl_pts)

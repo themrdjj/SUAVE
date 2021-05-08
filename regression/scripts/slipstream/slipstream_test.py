@@ -14,8 +14,6 @@ from SUAVE.Core import Units
 import numpy as np
 import pylab as plt
 
-from SUAVE.Core import Data , Container
-from SUAVE.Methods.Propulsion import propeller_design
 from SUAVE.Plots.Mission_Plots import *  
 from SUAVE.Plots.Geometry_Plots.plot_vehicle import plot_vehicle  
 from SUAVE.Plots.Geometry_Plots.plot_vehicle_vlm_panelization  import plot_vehicle_vlm_panelization
@@ -23,7 +21,6 @@ import sys
 sys.path.append('../Vehicles') 
 from X57_Maxwell import vehicle_setup, configs_setup 
 
-import copy
 
 # ----------------------------------------------------------------------
 #   Main
@@ -41,7 +38,7 @@ def main():
      
     # lift coefficient  
     lift_coefficient              = results.segments.cruise.conditions.aerodynamics.lift_coefficient[1][0]
-    lift_coefficient_true         = 0.4174472995786776
+    lift_coefficient_true         = 0.4173607616263117
 
     print(lift_coefficient)
     diff_CL                       = np.abs(lift_coefficient  - lift_coefficient_true) 
@@ -51,31 +48,19 @@ def main():
     
     # sectional lift coefficient check
     sectional_lift_coeff            = results.segments.cruise.conditions.aerodynamics.lift_breakdown.inviscid_wings_sectional[0]
-    sectional_lift_coeff_true       = np.array([ 2.32451942e-01,  2.28173996e-01,  2.12810735e-01,  1.61601823e-01,
-                                                 1.85928259e-01,  2.31402753e-01,  1.73843168e-01,  1.45587737e-01,
-                                                 1.21095841e-01,  9.68442636e-02,  7.31156675e-02,  5.06604296e-02,
-                                                 3.04020452e-02,  1.36439370e-02,  2.73528048e-03,  2.32451942e-01,
-                                                 2.28173996e-01,  2.12810735e-01,  1.61601823e-01,  1.85928259e-01,
-                                                 2.31402753e-01,  1.73843168e-01,  1.45587737e-01,  1.21095841e-01,
-                                                 9.68442636e-02,  7.31156675e-02,  5.06604296e-02,  3.04020452e-02,
-                                                 1.36439370e-02,  2.73528048e-03,  1.35113186e-03,  1.51599579e-03,
-                                                 1.78412381e-03,  2.13291643e-03,  2.51814819e-03,  2.89313373e-03,
-                                                 3.20573950e-03,  3.39047823e-03,  3.38421857e-03,  3.14639042e-03,
-                                                 2.67250478e-03,  2.00733983e-03,  1.25437865e-03,  5.68517565e-04,
-                                                 1.14000928e-04,  1.35113186e-03,  1.51599579e-03,  1.78412381e-03,
-                                                 2.13291643e-03,  2.51814819e-03,  2.89313373e-03,  3.20573950e-03,
-                                                 3.39047823e-03,  3.38421857e-03,  3.14639042e-03,  2.67250478e-03,
-                                                 2.00733983e-03,  1.25437865e-03,  5.68517565e-04,  1.14000928e-04,
-                                                -0.00000000e+00, -0.00000000e+00, -0.00000000e+00, -0.00000000e+00,
-                                                -0.00000000e+00, -0.00000000e+00, -0.00000000e+00, -0.00000000e+00,
-                                                -0.00000000e+00, -0.00000000e+00, -0.00000000e+00, -0.00000000e+00,
-                                                -0.00000000e+00, -0.00000000e+00, -0.00000000e+00])
+    sectional_lift_coeff_true       = np.array([4.11914951e-01, 3.75656483e-01, 3.44016280e-01, 2.82181515e-01,
+                                                1.80708913e-01, 4.11914951e-01, 3.75656483e-01, 3.44016280e-01,
+                                                2.82181515e-01, 1.80708913e-01, 1.37503489e-02, 1.40463944e-02,
+                                                1.42491021e-02, 1.43481687e-02, 1.02754137e-02, 1.37503489e-02,
+                                                1.40463944e-02, 1.42491021e-02, 1.43481687e-02, 1.02754137e-02,
+                                                1.97205770e-36, 2.30819853e-36, 4.11907872e-37, 1.57452897e-36,
+                                                7.28438135e-37])
 
     print(sectional_lift_coeff)
     diff_Cl                       = np.abs(sectional_lift_coeff - sectional_lift_coeff_true)
     print('Cl difference')
     print(diff_Cl)
-    assert  max(np.abs(sectional_lift_coeff - sectional_lift_coeff_true)) < 1e-6
+    assert  np.max(np.abs(sectional_lift_coeff - sectional_lift_coeff_true)) < 1e-6
 
     # plot results 
     plot_mission(results,configs.base)  
@@ -164,8 +149,8 @@ def base_analysis(vehicle):
     aerodynamics = SUAVE.Analyses.Aerodynamics.Fidelity_Zero()     
     aerodynamics.settings.use_surrogate              = False
     aerodynamics.settings.propeller_wake_model       = True 
-    aerodynamics.settings.number_spanwise_vortices   = 15
-    aerodynamics.settings.number_chordwise_vortices  = 5   
+    aerodynamics.settings.number_spanwise_vortices   = 5
+    aerodynamics.settings.number_chordwise_vortices  = 2   
     aerodynamics.geometry                            = vehicle
     aerodynamics.settings.drag_coefficient_increment = 0.0000
     analyses.append(aerodynamics)
