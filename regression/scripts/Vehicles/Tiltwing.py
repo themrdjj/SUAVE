@@ -8,14 +8,14 @@
 # ---------------------------------------------------------------------
 import SUAVE
 from SUAVE.Core import Units, Data
-import copy 
-   
-from SUAVE.Components.Energy.Networks.Vectored_Thrust              import Vectored_Thrust
-from SUAVE.Methods.Power.Battery.Sizing                            import initialize_from_mass
-from SUAVE.Methods.Power.Battery.Sizing                            import initialize_from_module_packaging 
-from SUAVE.Methods.Weights.Correlations.Propulsion                 import nasa_motor
-from SUAVE.Methods.Propulsion.electric_motor_sizing                import size_optimal_motor
-from SUAVE.Methods.Propulsion                                      import propeller_design  
+import copy
+from SUAVE.Components.Energy.Networks.Vectored_Thrust import Vectored_Thrust
+from SUAVE.Methods.Power.Battery.Sizing import initialize_from_mass
+from SUAVE.Methods.Propulsion.electric_motor_sizing import size_from_mass , size_optimal_motor
+from SUAVE.Methods.Propulsion import propeller_design 
+from SUAVE.Methods.Aerodynamics.Fidelity_Zero.Lift import compute_max_lift_coeff 
+from SUAVE.Methods.Weights.Buildups.Electric_Vectored_Thrust.empty import empty
+from SUAVE.Methods.Utilities.Chebyshev  import chebyshev_data
 from SUAVE.Plots.Geometry_Plots import * 
 
 import numpy as np
@@ -187,100 +187,167 @@ def vehicle_setup():
     #------------------------------------------------------------------
     # PROPULSOR
     #------------------------------------------------------------------
-    net                            = Vectored_Thrust()    
-    net.number_of_engines          = 8
-    net.thrust_angle               = 0.0   * Units.degrees #  conversion to radians, 
-    net.nacelle_diameter           = 0.2921 # https://www.magicall.biz/products/integrated-motor-controller-magidrive/
-    net.engine_length              = 0.95 
-    net.areas                      = Data()
-    net.areas.wetted               = np.pi*net.nacelle_diameter*net.engine_length + 0.5*np.pi*net.nacelle_diameter**2     
-                                   
-    # Component 1 the ESC
-    esc                            = SUAVE.Components.Energy.Distributors.Electronic_Speed_Controller()
-    esc.efficiency                 = 0.95
-    net.esc                        = esc 
+    net                   = Vectored_Thrust()    
+    net.number_of_engines = 8
+    net.thrust_angle      = 0.0   * Units.degrees #  conversion to radians, 
+    net.nacelle_diameter  = 0.2921 # https://www.magicall.biz/products/integrated-motor-controller-magidrive/
+    net.engine_length     = 0.95 
+    net.areas             = Data()
+    net.areas.wetted      = np.pi*net.nacelle_diameter*net.engine_length + 0.5*np.pi*net.nacelle_diameter**2    
+    net.voltage           = 400.             
 
-    # Component 2 the Payload
-    payload                        = SUAVE.Components.Energy.Peripherals.Payload()
-    payload.power_draw             = 10. # Watts 
-    payload.mass_properties.mass   = 1.0 * Units.kg
-    net.payload                    = payload
-                                  
-    # Component 3 the Avionics    
-    avionics                       = SUAVE.Components.Energy.Peripherals.Avionics()
-    avionics.power_draw            = 20. # Watts  
-    net.avionics                   = avionics   
-    
-    # Component 4 Miscellaneous Systems 
-    sys                            = SUAVE.Components.Systems.System()
-    sys.mass_properties.mass       = 5 # kg       
+    #------------------------------------------------------------------
+    # Design Electronic Speed Controller 
+    #------------------------------------------------------------------
+    esc                          = SUAVE.Components.Energy.Distributors.Electronic_Speed_Controller()
+    esc.efficiency               = 0.95
+    net.esc                      = esc 
 
-    # Component 5 the Battery
-    bat                            = SUAVE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion_LiNiMnCoO2_18650()    
-    bat.pack_config.series         =  140  
-    bat.pack_config.parallel       =  48    
-    initialize_from_module_packaging(bat)       
-    net.battery                    = bat 
-    net.voltage                    = bat.max_voltage     
+    # Component 6 the Payload
+    payload = SUAVE.Components.Energy.Peripherals.Payload()
+    payload.power_draw           = 10. #Watts 
+    payload.mass_properties.mass = 1.0 * Units.kg
+    net.payload                  = payload
 
-    # Component 6 the Rotor 
-    speed_of_sound                 = 340
-    rho                            = 1.22 
-    fligth_CL                      = 0.75
-    AR                             = vehicle.wings.main_wing.aspect_ratio
-    Cd0                            = 0.06
-    Cdi                            = fligth_CL**2/(np.pi*AR*0.98)
-    Cd                             = Cd0 + Cdi   
- 
-    speed_of_sound                 = 340
-    rho                            = 1.22 
-    fligth_CL                      = 0.75
-    AR                             = vehicle.wings.main_wing.aspect_ratio
-    Cd0                            = 0.06
-    Cdi                            = fligth_CL**2/(np.pi*AR*0.98)
-    Cd                             = Cd0 + Cdi    
-    Lift                           = vehicle.mass_properties.takeoff*9.81
+    # Component 7 the Avionics
+    avionics = SUAVE.Components.Energy.Peripherals.Avionics()
+    avionics.power_draw = 20. #Watts  
+    net.avionics        = avionics      
 
-    rotor                          = SUAVE.Components.Energy.Converters.Rotor() 
-    rotor.y_pitch                  = 1.850
-    rotor.tip_radius               = 0.8875  
-    rotor.hub_radius               = 0.15 
-    rotor.disc_area                = np.pi*(rotor.tip_radius**2)   
-    rotor.design_tip_mach          = 0.5
-    rotor.number_of_blades         = 3  
-    rotor.freestream_velocity      = 10     
-    rotor.angular_velocity         = rotor.design_tip_mach*speed_of_sound/rotor.tip_radius      
-    rotor.design_Cl                = 0.7
-    rotor.design_altitude          = 500 * Units.feet                  
-    rotor.design_thrust            = (Lift * 1.5  )/net.number_of_engines  
-    rotor.induced_hover_velocity   = np.sqrt(Lift/(2*rho*rotor.disc_area*net.number_of_engines))                     
-    rotor                          = propeller_design(rotor)  
-    rotor.rotation                 = [1,1,1,1,1,1,1,1] 
-    rear_rotor_origin              = [[-0.2, 1.347, 0.0], [-0.2, 3.2969999999999997, 0.0],
-                                      [-0.2, -1.347, 0.0], [-0.2, -3.2969999999999997, 0.0]]
-    front_rotor_origin             = [[4.938, 1.347, 1.54], [4.938, 3.2969999999999997, 1.54],
-                                      [4.938, -1.347, 1.54], [4.938, -3.2969999999999997, 1.54]] 
-    rotor.origin                   = rear_rotor_origin + front_rotor_origin     
-    net.rotor                      = rotor
+    # add the solar network to the vehicle
+    vehicle.append_component(net)        
 
-    # Component 7 the Motors
+    #------------------------------------------------------------------
+    # Design Battery
+    #------------------------------------------------------------------ 
+    bat = SUAVE.Components.Energy.Storages.Batteries.Constant_Mass.Lithium_Ion()
+    bat.mass_properties.mass = 300. * Units.kg  
+    bat.specific_energy      = 200. * Units.Wh/Units.kg
+    bat.resistance           = 0.006
+    bat.max_voltage          = 400.
+
+    initialize_from_mass(bat,bat.mass_properties.mass)
+    net.battery              = bat 
+    net.voltage              = bat.max_voltage
+
+    # Component 9 Miscellaneous Systems 
+    sys = SUAVE.Components.Systems.System()
+    sys.mass_properties.mass = 5 # kg
+
+    #------------------------------------------------------------------
+    # Design Rotors  
+    #------------------------------------------------------------------ 
+    # atmosphere conditions 
+    speed_of_sound               = 340
+    rho                          = 1.22 
+    fligth_CL                    = 0.75
+    AR                           = vehicle.wings.main_wing.aspect_ratio
+    Cd0                          = 0.06
+    Cdi                          = fligth_CL**2/(np.pi*AR*0.98)
+    Cd                           = Cd0 + Cdi   
+
+    # Create propeller geometry  
+    rot                          = SUAVE.Components.Energy.Converters.Rotor() 
+    rot.y_pitch                  = 1.850
+    rot.tip_radius               = 0.8875  
+    rot.hub_radius               = 0.15 
+    rot.disc_area                = np.pi*(rot.tip_radius**2)   
+    rot.design_tip_mach          = 0.5
+    rot.number_of_blades         = 3  
+    rot.freestream_velocity      = 10     
+    rot.angular_velocity         = rot.design_tip_mach*speed_of_sound/rot.tip_radius      
+    rot.design_Cl                = 0.7
+    rot.design_altitude          = 500 * Units.feet                  
+    Lift                         = vehicle.mass_properties.takeoff*9.81  
+    rot.design_thrust            = (Lift * 1.5  )/net.number_of_engines  
+    rot.induced_hover_velocity   = np.sqrt(Lift/(2*rho*rot.disc_area*net.number_of_engines))    
+
+    rot.airfoil_geometry         =  ['../Vehicles/Airfoils/NACA_4412.txt'] 
+    rot.airfoil_polars           = [['../Vehicles/Airfoils/Polars/NACA_4412_polar_Re_50000.txt' ,
+                                     '../Vehicles/Airfoils/Polars/NACA_4412_polar_Re_100000.txt' ,
+                                     '../Vehicles/Airfoils/Polars/NACA_4412_polar_Re_200000.txt' ,
+                                     '../Vehicles/Airfoils/Polars/NACA_4412_polar_Re_500000.txt' ,
+                                     '../Vehicles/Airfoils/Polars/NACA_4412_polar_Re_1000000.txt' ]]
+    rot.airfoil_polar_stations   = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]     
+    rot                          = propeller_design(rot)  
+    rot.rotation                 = [1,1,1,1,1,1,1,1]
+
+    # Front Rotors Locations 
+    rot_front                    = Data()
+    rot_front.origin             =  [[-0.2 , 1.347 ,0. ]]
+    rot_front.symmetric          = True
+    rot_front.x_pitch_count      = 1
+    rot_front.y_pitch_count      = 2     
+    rot_front.y_pitch            = 1.95 
+
+    # populating rotors on one side of wing
+    if rot_front.y_pitch_count > 1 :
+        for n in range(rot_front.y_pitch_count):
+            if n == 0:
+                continue
+            for i in range(len(rot_front.origin)):
+                propeller_origin = [rot_front.origin[i][0] , rot_front.origin[i][1] +  n*rot_front.y_pitch ,rot_front.origin[i][2]]
+                rot_front.origin.append(propeller_origin)   
+
+
+    # populating rotors on the other side of the vehicle   
+    if rot_front.symmetric : 
+        for n in range(len(rot_front.origin)):
+            propeller_origin = [rot_front.origin[n][0] , -rot_front.origin[n][1] ,rot_front.origin[n][2] ]
+            rot_front.origin.append(propeller_origin) 
+
+    # Rear Rotors Locations 
+    rot_rear               = Data()
+    rot_rear.origin        =  [[ 5.138 -0.2, 1.347 ,1.54 ]]  
+    rot_rear.symmetric     = True
+    rot_rear.x_pitch_count = 1
+    rot_rear.y_pitch_count = 2     
+    rot_rear.y_pitch       = 1.95                 
+    # populating rotors on one side of wing
+    if rot_rear.y_pitch_count > 1 :
+        for n in range(rot_rear.y_pitch_count):
+            if n == 0:
+                continue
+            for i in range(len(rot_rear.origin)):
+                propeller_origin = [rot_rear.origin[i][0] , rot_rear.origin[i][1] +  n*rot_rear.y_pitch ,rot_rear.origin[i][2]]
+                rot_rear.origin.append(propeller_origin)   
+
+
+    # populating rotors on the other side of the vehicle   
+    if rot_rear.symmetric : 
+        for n in range(len(rot_rear.origin)):
+            propeller_origin = [rot_rear.origin[n][0] , -rot_rear.origin[n][1] ,rot_rear.origin[n][2] ]
+            rot_rear.origin.append(propeller_origin) 
+
+    # Assign all rotors (front and rear) to network
+    rot.origin = rot_front.origin + rot_rear.origin   
+
+    # append rotors to vehicle     
+    net.rotor = rot
+
+    # Motor
+    #------------------------------------------------------------------
+    # Design Motors
+    #------------------------------------------------------------------
+    # Propeller (Thrust) motor
     motor                      = SUAVE.Components.Energy.Converters.Motor()
     motor.mass_properties.mass = 9. * Units.kg
-    motor.origin               = rotor.origin  
+    motor.origin               = rot_front.origin + rot_rear.origin  
     motor.efficiency           = 0.935
     motor.gear_ratio           = 1. 
     motor.gearbox_efficiency   = 1. # Gear box efficiency        
     motor.nominal_voltage      = bat.max_voltage *3/4  
-    motor.propeller_radius     = rotor.tip_radius 
-    motor.no_load_current      = 0.01 
-    motor                      = size_optimal_motor(motor,rotor) 
+    motor.propeller_radius     = rot.tip_radius 
+    motor.no_load_current      = 2.0 
+    motor                      = size_optimal_motor(motor,rot) 
     net.motor                  = motor 
+
     vehicle.append_component(net) 
 
 
     # Add extra drag sources from motors, props, and landing gear. All of these hand measured 
     motor_height                     = .25 * Units.feet
-    motor_width                      = 1.6 * Units.feet 
+    motor_width                      =  1.6 * Units.feet 
     propeller_width                  = 1. * Units.inches
     propeller_height                 = propeller_width *.12 
     main_gear_width                  = 1.5 * Units.inches
@@ -297,10 +364,16 @@ def vehicle_setup():
     total_excrescence_area_no_spin   = total_excrescence_area_spin + 12*propeller_height*propeller_width  
     vehicle.excrescence_area_no_spin = total_excrescence_area_no_spin 
     vehicle.excrescence_area_spin    = total_excrescence_area_spin  
-     
-    # append motor origin spanwise locations onto wing data structure  
-    vehicle.wings['canard_wing'].motor_spanwise_locations = np.multiply(0.19 ,np.array(front_rotor_origin)[:,1]) 
-    vehicle.wings['main_wing'].motor_spanwise_locations   = np.multiply(0.19 ,np.array(rear_rotor_origin )[:,1])    
+    # append motor origin spanwise locations onto wing data structure 
+    motor_origins_front              = np.array(rot_front.origin)
+
+    vehicle.wings['canard_wing'].motor_spanwise_locations = np.multiply(
+        0.19 ,motor_origins_front[:,1])
+    motor_origins_rear = np.array(rot_rear.origin)
+    vehicle.wings['main_wing'].motor_spanwise_locations = np.multiply(
+        0.19 ,motor_origins_rear[:,1])    
+
+    net.origin = rot.origin 
 
     return vehicle
 
