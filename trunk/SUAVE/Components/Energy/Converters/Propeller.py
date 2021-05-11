@@ -65,6 +65,7 @@ class Propeller(Energy_Component):
         self.nacelle_angle             = None
         self.pitch_command             = 0.0
         self.design_power              = None
+        self.VTOL_flag                 = False 
         self.design_thrust             = None        
         self.induced_hover_velocity    = 0.0
         self.airfoil_geometry          = None
