@@ -60,6 +60,7 @@ class Rotor(Energy_Component):
         self.mid_chord_alignment       = 0.0
         self.blade_solidity            = 0.0
         self.thrust_angle              = 0.0
+        self.nacelle_angle             = None
         self.pitch_command             = 0.0
         self.design_power              = None
         self.design_thrust             = None        

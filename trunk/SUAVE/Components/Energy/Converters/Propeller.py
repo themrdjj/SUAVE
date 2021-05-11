@@ -62,6 +62,7 @@ class Propeller(Energy_Component):
         self.thickness_to_chord        = 0.0
         self.blade_solidity            = 0.0
         self.thrust_angle              = 0.0
+        self.nacelle_angle             = None
         self.pitch_command             = 0.0
         self.design_power              = None
         self.design_thrust             = None        
@@ -161,6 +162,7 @@ class Propeller(Energy_Component):
         cl_sur  = self.airfoil_cl_surrogates
         cd_sur  = self.airfoil_cd_surrogates 
         tc      = self.thickness_to_chord
+        VTOL    = self.VTOL_flag 
         rho     = conditions.freestream.density[:,0,None]
         mu      = conditions.freestream.dynamic_viscosity[:,0,None]
         Vv      = conditions.frames.inertial.velocity_vector 
@@ -186,6 +188,11 @@ class Propeller(Energy_Component):
         T_body2thrust   = orientation_transpose(np.ones_like(T_body2inertial[:])*body2thrust)  
         V_thrust        = orientation_product(T_body2thrust,V_body) 
         
+        if VTOL:    
+            V        = V_thrust[:,0,None] + ua
+        else:
+            V        = V_thrust[:,0,None]   
+        ut  = np.zeros_like(V)         
         
         #Things that don't change with iteration
         Nr       = len(c) # Number of stations radially    
@@ -239,7 +246,7 @@ class Propeller(Energy_Component):
                 rotation = 1
             
             # compute resulting radial and tangential velocities in propeller frame
-            ut =  ( Vz*np.cos(psi_2d)  ) * rotation
+            ut =  ( Vz*np.cos(psi_2d)  )  
             ur =  (-Vz*np.sin(psi_2d)  )
             ua =  np.zeros_like(ut)
             

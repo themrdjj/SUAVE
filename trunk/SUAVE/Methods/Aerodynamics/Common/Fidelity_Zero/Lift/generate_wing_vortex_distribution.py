@@ -784,8 +784,7 @@ def generate_wing_vortex_distribution(geometry,settings):
                 za1   = np.concatenate([za1,-za1])
                 xa2   = np.concatenate([xa2,xa2])
                 ya2   = np.concatenate([ya2,ya2])
-                za2   = np.concatenate([za2,-za2])
-                      
+                za2   = np.concatenate([za2,-za2]) 
                 xb1   = np.concatenate([xb1,xb1])
                 yb1   = np.concatenate([yb1,yb1])    
                 zb1   = np.concatenate([zb1,-zb1])
@@ -835,8 +834,7 @@ def generate_wing_vortex_distribution(geometry,settings):
                 za1   = np.concatenate([za1,za1])
                 xa2   = np.concatenate([xa2,xa2])
                 ya2   = np.concatenate([ya2,-ya2])
-                za2   = np.concatenate([za2,za2])
-                      
+                za2   = np.concatenate([za2,za2]) 
                 xb1   = np.concatenate([xb1,xb1])
                 yb1   = np.concatenate([yb1,-yb1])    
                 zb1   = np.concatenate([zb1,zb1])
