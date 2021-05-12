@@ -213,8 +213,12 @@ def empty(config,
         #-------------------------------------------------------------------------------
         if 'rotor' in propulsor.keys():
             rTipLiftProp        = propulsor.rotor.tip_radius  
-            rotor_bladeSol      = propulsor.rotor.blade_solidity    
-        else:
+            rotor_bladeSol      = propulsor.rotor.blade_solidity 
+            
+        elif ('rotor' not in propulsor.keys()) and ( 'propeller' in propulsor.keys()):
+            rTipLiftProp        = propulsor.propeller.tip_radius  
+            rotor_bladeSol      = propulsor.propeller.blade_solidity  
+        else: 
             rTipLiftProp        = 0.0
             rotor_bladeSol      = 0.0 
 
@@ -222,16 +226,21 @@ def empty(config,
             nLiftProps          = propulsor.number_of_rotor_engines
             nThrustProps        = propulsor.number_of_propeller_engines 
 
-        elif isinstance(propulsor, Battery_Propeller) or isinstance(propulsor, Vectored_Thrust):
+        elif isinstance(propulsor, Vectored_Thrust): 
             nLiftProps          = propulsor.number_of_engines 
             nThrustProps        = 0.0
+            
+        elif isinstance(propulsor, Battery_Propeller): 
+            nLiftProps          = 0.0  
+            nThrustProps        = propulsor.number_of_engines          
+            
 
         else:
             warn("""eVTOL weight buildup only supports the Battery Propeller, Lift Cruise and Vectored Thrust energy networks.\n
             Weight buildup will not return information on propulsion system.""", stacklevel=1)
 
         # total number of propellers and rotors
-        nProps      = nLiftProps + nThrustProps
+        nProps      = int(nLiftProps + nThrustProps)
         tipMach     = max_tip_mach
         k           = disk_area_factor
         ToverW      = max_thrust_to_weight_ratio
@@ -242,13 +251,12 @@ def empty(config,
         AvgBladeCD   = 0.012                                               # Average Blade CD
         maxLiftPower = 1.15*maxLift*(k*np.sqrt(maxLift/(2*rho_ref*np.pi*rTipLiftProp**2)) +
                                              rotor_bladeSol*AvgBladeCD/8*maxVTip**3/(maxLift/(rho_ref*np.pi*rTipLiftProp**2)))   
-        maxLiftOmega = maxVTip/rTipLiftProp
 
         # Servo, Hub and BRS Weight
         if isinstance(propulsor, Battery_Propeller):
             servo_weight   = 5.2  * Units.kg
             hub_weight     = MTOW * 0.04  * Units.kg
-            if nLiftProps > 1:
+            if nProps > 1:
                 BRS_weight = 16.   * Units.kg
 
         elif isinstance(propulsor, Vectored_Thrust):
@@ -268,6 +276,7 @@ def empty(config,
 
         # Tail Rotor
         if nLiftProps == 1: # this assumes that the vehicle is an electric helicopter with a tail rotor 
+            maxLiftOmega      = maxVTip/rTipLiftProp
             maxLiftTorque     = maxLiftPower / maxLiftOmega
             output.tail_rotor += prop(propulsor.propeller, 1.5*maxLiftTorque/(1.25*rTipLiftProp))*0.2 * Units.kg
 
