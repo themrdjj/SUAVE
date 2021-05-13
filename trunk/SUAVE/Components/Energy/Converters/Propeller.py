@@ -68,6 +68,7 @@ class Propeller(Energy_Component):
         self.VTOL_flag                 = False 
         self.design_thrust             = None        
         self.induced_hover_velocity    = 0.0
+        self.angle_offset              = np.empty(shape=[0,1])
         self.airfoil_geometry          = None
         self.airfoil_polars            = None
         self.airfoil_polar_stations    = None 

@@ -328,8 +328,9 @@ def plot_propeller_geometry(axes,prop,propulsor,propulsor_name):
     b      = prop.chord_distribution         
     r      = prop.radius_distribution 
     MCA    = prop.mid_chord_alignment
-    t      = prop.max_thickness_distribution
-    
+    t      = prop.max_thickness_distribution 
+    a_o    = prop.angle_offset     
+ 
     # Thrust angle of engine 
     if propulsor_name == 'propeller': 
         try:
@@ -361,14 +362,19 @@ def plot_propeller_geometry(axes,prop,propulsor,propulsor_name):
     dim          = len(b)
     dim2         = 2*n_points
     num_props    = len(origin) 
-    theta        = np.linspace(0,2*np.pi,num_B+1)[:-1]   
+    theta        = np.linspace(0,2*np.pi,num_B+1)[:-1]    
+   
+    # Angle offset 
+    if len(a_o) != num_props:
+        a_o = np.zeros(num_props) 
+    else:
+        pass
     
     # create empty data structure for storing geometry
     G = Data()    
     
     for n_p in range(num_props):  
         rot    = prop.rotation[n_p] 
-        a_o    = 0
         flip_1 = (np.pi/2)  
         flip_2 = (np.pi/2)  
         
@@ -417,8 +423,8 @@ def plot_propeller_geometry(axes,prop,propulsor,propulsor_name):
     
             # rotation about x axis to create azimuth locations 
             trans_2 = np.array([[1 , 0 , 0],
-                           [0 , np.cos(theta[i] + rot*a_o + flip_2 ), np.sin(theta[i] + rot*a_o + flip_2)],
-                           [0,np.sin(theta[i] + rot*a_o + flip_2), np.cos(theta[i] + rot*a_o + flip_2)]]) 
+                           [0 , np.cos(theta[i] + rot*a_o[n_p] + flip_2 ), np.sin(theta[i] + rot*a_o[n_p] + flip_2)],
+                           [0,np.sin(theta[i] + rot*a_o[n_p] + flip_2), np.cos(theta[i] + rot*a_o[n_p] + flip_2)]]) 
             trans_2 =  np.repeat(trans_2[ np.newaxis,:,: ],dim,axis=0)
             
             # roation about y to orient propeller/rotor to thrust angle 
