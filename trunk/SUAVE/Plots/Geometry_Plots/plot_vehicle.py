@@ -134,14 +134,14 @@ def plot_wings(axes,VD,plot_wing_surface,face_color,edge_color,alpha_val):
             collection.set_alpha(alpha_val) 
             axes.add_collection3d(collection)     
             
-            max_range = np.array([VD.XC.max()-VD.XC.min(), VD.YC.max()-VD.YC.min(), VD.ZC.max()-VD.ZC.min()]).max() / 2.0 
-            mid_x = (VD.XC .max()+VD.XC .min()) * 0.5
-            mid_y = (VD.YC .max()+VD.YC .min()) * 0.5
-            mid_z = (VD.ZC .max()+VD.ZC .min()) * 0.5 
-            axes.set_xlim(mid_x - max_range, mid_x + max_range)
-            axes.set_ylim(mid_y - max_range, mid_y + max_range)
-            axes.set_zlim(mid_z - max_range, mid_z + max_range)                
-                    
+        max_range = np.array([VD.XC.max()-VD.XC.min(), VD.YC.max()-VD.YC.min(), VD.ZC.max()-VD.ZC.min()]).max() / 2 
+        mid_x = (VD.XC .max()+VD.XC .min()) * 0.5
+        mid_y = (VD.YC .max()+VD.YC .min()) * 0.5
+        mid_z = (VD.ZC .max()+VD.ZC .min()) * 0.5 
+        axes.set_xlim(mid_x - max_range, mid_x + max_range)
+        axes.set_ylim(mid_y - max_range, mid_y + max_range)
+        axes.set_zlim(mid_z - max_range, mid_z + max_range)                
+                
         
     else: 
         n    = VD.n_cp
@@ -156,13 +156,13 @@ def plot_wings(axes,VD,plot_wing_surface,face_color,edge_color,alpha_val):
             collection.set_alpha(alpha_val) 
             axes.add_collection3d(collection)     
             
-            max_range = np.array([VD.XC.max()-VD.XC.min(), VD.YC.max()-VD.YC.min(), VD.ZC.max()-VD.ZC.min()]).max() / 2.0 
-            mid_x = (VD.XC .max()+VD.XC .min()) * 0.5
-            mid_y = (VD.YC .max()+VD.YC .min()) * 0.5
-            mid_z = (VD.ZC .max()+VD.ZC .min()) * 0.5 
-            axes.set_xlim(mid_x - max_range, mid_x + max_range)
-            axes.set_ylim(mid_y - max_range, mid_y + max_range)
-            axes.set_zlim(mid_z - max_range, mid_z + max_range)                
+        max_range = np.array([VD.XC.max()-VD.XC.min(), VD.YC.max()-VD.YC.min(), VD.ZC.max()-VD.ZC.min()]).max() / 2.0 
+        mid_x = (VD.XC .max()+VD.XC .min()) * 0.5
+        mid_y = (VD.YC .max()+VD.YC .min()) * 0.5
+        mid_z = (VD.ZC .max()+VD.ZC .min()) * 0.5 
+        axes.set_xlim(mid_x - max_range, mid_x + max_range)
+        axes.set_ylim(mid_y - max_range, mid_y + max_range)
+        axes.set_zlim(mid_z - max_range, mid_z + max_range)                
         
     return    
  
@@ -1309,9 +1309,9 @@ def generate_nacelle_points(VD,component,propulsor,propulsor_name,tessellation):
 
   
     # Thrust Angle  
-    try:
+    if component.nacelle_angle != None:
         ta  = component.nacelle_angle  
-    except: 
+    else: 
         if propulsor_name == 'propeller': 
             try:
                 ta = propulsor.propeller_thrust_angle 
